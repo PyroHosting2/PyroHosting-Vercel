@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Server - PyroHosting</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Reusing styles from dashboard */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar (Synced) */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 12, 0.95);
+            border-right: none;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-brand span {
+            color: var(--accent);
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+            border-left: 3px solid transparent;
+            /* Prevent jump */
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(238, 129, 50, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+
+        .badge-new {
+            background: #ff9800;
+            color: black;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Snow & Lights */
+        .holiday-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .light-string {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .light-bulb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: flash 1s infinite alternate;
+            position: relative;
+            top: -5px;
+        }
+
+        @keyframes flash {
+            from {
+                opacity: 0.5;
+            }
+
+            to {
+                opacity: 1;
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 1000;
+            color: white;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            100% {
+                transform: translateY(110vh) translateX(5vw);
+            }
+        }
+
+        /* Custom OS Select Styling */
+        .os-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 6px;
+            padding: 4px 10px;
+            padding-right: 30px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+        }
+
+        .os-select:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .os-select option {
+            background: #1a1a1d;
+            color: white;
+            padding: 10px;
+        }
+
+        /* Content Specifics */
+        .page-header {
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .page-header p {
+            color: var(--muted);
+        }
+
+        .free-server-card {
+            background: linear-gradient(145deg, rgba(25, 25, 28, 0.8), rgba(20, 20, 24, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .free-server-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff9800, #ff3366);
+        }
+
+        .server-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(238, 129, 50, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--accent);
+        }
+
+        .server-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .server-desc {
+            color: var(--secondary);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            text-align: left;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .btn-claim {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(238, 129, 50, 0.3);
+        }
+
+        .btn-claim:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(238, 129, 50, 0.4);
+        }
+
+        /* Claimed Animation Styles */
+        .claimed-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .cross-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 51, 51, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.2);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .cross-line {
+            position: absolute;
+            width: 60%;
+            height: 6px;
+            background-color: #ff3333;
+            border-radius: 10px;
+        }
+
+        .cross-line.one {
+            transform: rotate(45deg);
+        }
+
+        .cross-line.two {
+            transform: rotate(-45deg);
+        }
+
+        .claimed-text {
+            color: #ff3333;
+            font-weight: 700;
+            font-size: 1.2rem;
+            opacity: 0;
+            animation: fadeIn 0.5s ease 0.3s forwards;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            80% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Installation Overlay */
+        #install-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        #install-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .progress-container {
+            width: 400px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 2rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #ff3366);
+            transition: width 0.5s;
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        {% set active_page = 'free_server' %}
+        {% set user_balance = user.balance if user is defined else (user_session.balance if user_session is defined else
+        0) %}
+        {% include 'sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Holiday Lights -->
+            <div class="light-string">
+                <div class="light-bulb" style="background:red; box-shadow:0 0 10px red; animation-delay:0s"></div>
+                <div class="light-bulb" style="background:blue; box-shadow:0 0 10px blue; animation-delay:1.4s"></div>
+                <div class="light-bulb" style="background:lime; box-shadow:0 0 10px lime; animation-delay:2.8s"></div>
+            </div>
+
+            <div class="page-header">
+                <h1>Free Server</h1>
+                <p>Dein kostenloser Einstieg in die Welt von PyroHosting.</p>
+            </div>
+
+            <div class="free-server-card">
+                <div class="server-icon">
+                    <i data-feather="gift" style="width:40px; height:40px;"></i>
+                </div>
+
+                <div class="server-title">Intel Starter Kostenlos</div>
+                <p class="server-desc">
+                    Hole dir jetzt deinen persönlichen Cloud Server für 24 Stunden.
+                    Ideal zum Testen, Experimentieren oder für kleine Projekte.
+                </p>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i data-feather="cpu" style="color:var(--accent)"></i> 2 vCore CPU
+                    </div>
+                    <div class="feature-item">
+                        <i data-feather="hard-drive" style="color:var(--accent)"></i> 4 GB RAM
+                    </div>
+                    <div class="feature-item">
+                        <i data-feather="database" style="color:var(--accent)"></i> 40 GB NVMe
+                    </div>
+                    <div class="feature-item">
+                        <i data-feather="monitor" style="color:var(--accent)"></i>
+                        <select id="free-os" class="os-select">
+                            <option value="Ubuntu 22.04">Ubuntu 22.04</option>
+                            <option value="Debian 13">Debian 13</option>
+                        </select>
+                    </div>
+                    <div class="feature-item">
+                        <i data-feather="clock" style="color:var(--accent)"></i> 24 Stunden Laufzeit
+                    </div>
+                </div>
+
+                {% if claimed %}
+                <div class="claimed-container">
+                    <div class="cross-circle">
+                        <div class="cross-line one"></div>
+                        <div class="cross-line two"></div>
+                    </div>
+                    <div class="claimed-text">Bereits beansprucht</div>
+                </div>
+                {% else %}
+                <a href="javascript:void(0)" onclick="claimFreeServer()" class="btn-claim">
+                    <i data-feather="check-circle"></i> Jetzt Gratis Beanspruchen
+                </a>
+                {% endif %}
+
+                <!-- Installation Overlay -->
+                <div id="install-overlay">
+                    <div class="loader-spinner"></div>
+                    <h2 style="margin-top:2rem;">Server wird installiert...</h2>
+                    <p style="color:var(--muted)">Proxmox klont das Template und konfiguriert das Netzwerk.</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="install-progress"></div>
+                    </div>
+                    <div id="progress-status" style="margin-top:1rem; font-size:0.9rem; color:var(--accent)">
+                        Vorbereiten... 0%</div>
+                </div>
+
+                <p style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--muted);">
+                    *Nur einmal pro Discord-Account einlösbar. Keine automatische Verlängerung.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        function claimFreeServer() {
+            const os = document.getElementById('free-os').value;
+            const overlay = document.getElementById('install-overlay');
+            const progress = document.getElementById('install-progress');
+            const status = document.getElementById('progress-status');
+            overlay.classList.add('active');
+
+            let p = 0;
+            const interval = setInterval(() => {
+                p += Math.random() * 5;
+                if (p > 95) {
+                    p = 95;
+                    clearInterval(interval);
+                    status.innerText = "Finalisieren... 95%";
+                } else {
+                    progress.style.width = p + '%';
+                    let task = "Klonen...";
+                    if (p > 30) task = "Netzwerk konfigurieren...";
+                    if (p > 70) task = "Starten...";
+                    status.innerText = `${task} ${Math.floor(p)}%`;
+                }
+            }, 1000);
+
+            // Use fetch to allow passing params
+            fetch(`/claim_free_server?os=${encodeURIComponent(os)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        // Start polling for provisioning status
+                        const vmid = data.vmid;
+                        pollProvisioningStatus(vmid, interval, progress, status, overlay);
+                    } else {
+                        overlay.classList.remove('active');
+                        clearInterval(interval);
+                        notify("Fehler", data.message || "Konnte Server nicht erstellen.", "error");
+                    }
+                })
+                .catch(() => {
+                    overlay.classList.remove('active');
+                    clearInterval(interval);
+                    notify("Verbindungsfehler", "Konnte API nicht erreichen.", "error");
+                });
+        }
+
+        function pollProvisioningStatus(vmid, progressInterval, progress, status, overlay) {
+            const pollInterval = setInterval(() => {
+                fetch(`/server/${vmid}/provision_status`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (data.complete) {
+                                // Provisioning complete
+                                clearInterval(pollInterval);
+                                clearInterval(progressInterval);
+                                progress.style.width = '100%';
+                                status.innerText = 'Erfolgreich! 100%';
+                                setTimeout(() => window.location.href = "/dashboard", 1000);
+                            } else if (data.failed) {
+                                // Provisioning failed
+                                clearInterval(pollInterval);
+                                clearInterval(progressInterval);
+                                overlay.classList.remove('active');
+                                notify("Fehler", "Server-Erstellung fehlgeschlagen.", "error");
+                            }
+                            // Otherwise, keep polling (still in progress)
+                        }
+                    })
+                    .catch(e => {
+                        console.error("Polling error:", e);
+                        // Don't stop polling on network errors, just log them
+                    });
+            }, 2000); // Poll every 2 seconds
+        }
+
+        /* --- Notify System JS --- */
+        function notify(title, message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            const icons = {
+                success: 'check-circle',
+                error: 'x-circle',
+                info: 'info',
+                warning: 'alert-triangle'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon"><i data-feather="${icons[type]}"></i></div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            feather.replace();
+
+            setTimeout(() => {
+                toast.classList.add('closing');
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        // Snowfall (Reused)
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.innerHTML = '❄';
+            snowflake.classList.add('snowflake');
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            const duration = Math.random() * 5 + 5;
+            snowflake.style.animationDuration = duration + 's';
+            document.body.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), duration * 1000);
+        }
+        setInterval(createSnowflake, 200);
+    </script>
+</body>
+
+</html>

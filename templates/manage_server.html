@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Verwalten - PyroHosting</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Synced Sidebar & Layout */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            background: #0a0a0c;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 12, 0.95);
+            border-right: none;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            backdrop-filter: blur(20px);
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(238, 129, 50, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+            background: radial-gradient(circle at top right, rgba(238, 129, 50, 0.05), transparent 40%);
+        }
+
+        /* Manage Page Smooth Styling */
+        .breadcrumbs {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .breadcrumbs span {
+            color: white;
+        }
+
+        .header-section {
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            background: #00e676;
+            color: black;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 2px 10px;
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+        }
+
+        .tab-menu {
+            display: flex;
+            gap: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .tab-menu::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-item {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            white-space: nowrap;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .tab-item:hover,
+        .tab-item.active {
+            color: white;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.6rem;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .tab-item i {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            vertical-align: text-bottom;
+        }
+
+        /* Grid Layout */
+        .manage-grid {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 1.5rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .panel:hover {
+            border-color: rgba(238, 129, 50, 0.2);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .panel-title i {
+            color: var(--accent);
+        }
+
+        /* Tab Content Control */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: smoothTab 0.4s ease-out;
+        }
+
+        @keyframes smoothTab {
+            from {
+                opacity: 0;
+                filter: blur(5px);
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: scale(1);
+            }
+        }
+
+        /* Server Info Table */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            row-gap: 1.25rem;
+            column-gap: 2.5rem;
+            font-size: 0.9rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 0.5rem;
+        }
+
+        .info-label {
+            color: var(--muted);
+        }
+
+        .info-value {
+            color: white;
+            font-weight: 500;
+            font-family: monospace;
+        }
+
+        /* Action Buttons */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 0.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-start {
+            border-color: rgba(0, 230, 118, 0.3);
+            color: #00e676;
+        }
+
+        .btn-start:hover {
+            background: rgba(0, 230, 118, 0.1);
+            border-color: #00e676;
+        }
+
+        .btn-stop {
+            border-color: rgba(255, 51, 51, 0.3);
+            color: #ff3333;
+        }
+
+        .btn-stop:hover {
+            background: rgba(255, 51, 51, 0.1);
+            border-color: #ff3333;
+        }
+
+        .btn-restart {
+            border-color: rgba(255, 179, 0, 0.3);
+            color: #ffb300;
+        }
+
+        .btn-restart:hover {
+            background: rgba(255, 179, 0, 0.1);
+            border-color: #ffb300;
+        }
+
+        .btn-renew {
+            border-color: rgba(213, 0, 249, 0.3);
+            color: #d500f9;
+        }
+
+        .btn-renew:hover {
+            background: rgba(213, 0, 249, 0.1);
+            border-color: #d500f9;
+        }
+
+        .btn-vnc {
+            border-color: rgba(255, 109, 0, 0.3);
+            color: #ff6d00;
+        }
+
+        .btn-vnc:hover {
+            background: rgba(255, 109, 0, 0.1);
+            border-color: #ff6d00;
+        }
+
+        .btn-reset {
+            border-color: rgba(41, 121, 255, 0.3);
+            color: #2979ff;
+        }
+
+        .btn-reset:hover {
+            background: rgba(41, 121, 255, 0.1);
+            border-color: #2979ff;
+        }
+
+        /* OS Selection Cards */
+        .os-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .os-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            background: rgba(238, 129, 50, 0.05);
+        }
+
+        .os-card.active {
+            border-color: var(--accent);
+            background: rgba(238, 129, 50, 0.1);
+            box-shadow: 0 0 20px rgba(238, 129, 50, 0.1);
+        }
+
+        .os-card.active::after {
+            content: '\2713';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent);
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .os-card span {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--muted);
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .os-card:hover span,
+        .os-card.active span {
+            color: white;
+        }
+
+        /* IP Table Custom Styles */
+        .ip-table th {
+            padding: 1rem 0;
+            text-align: left;
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .ip-table td {
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .ip-type-badge {
+            background: rgba(238, 129, 50, 0.2);
+            color: #ff9800;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .meta-info {
+            font-size: 0.85rem;
+            color: var(--muted);
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .meta-icon-box {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .meta-green {
+            background: rgba(0, 230, 118, 0.15);
+            color: #00e676;
+        }
+
+        .meta-red {
+            background: rgba(255, 51, 51, 0.15);
+            color: #ff3333;
+        }
+
+        /* Confirmation View Styles */
+        .warning-box {
+            background: rgba(255, 51, 51, 0.05);
+            border: 1px solid rgba(255, 51, 51, 0.2);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #ff3333;
+            font-size: 0.9rem;
+        }
+
+        .selected-os-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-danger {
+            background: #880e4f;
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: #ad1457;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(173, 20, 87, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--muted);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Statistics Styling */
+        .chart-box {
+            padding: 1rem;
+            height: 320px;
+            position: relative;
+        }
+
+        .stat-grid-inner {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .full-width-panel {
+            grid-column: 1 / -1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(238, 129, 50, 0.2);
+        }
+
+        /* Holiday Effects */
+        .snowflake {
+            position: fixed;
+            top: -5vh;
+            pointer-events: none;
+            color: white;
+            user-select: none;
+            z-index: 9999;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(105vh);
+            }
+        }
+
+        .status-suspended {
+            background: rgba(255, 152, 0, 0.2) !important;
+            color: #ff9800 !important;
+            border: 1px solid rgba(255, 152, 0, 0.3) !important;
+        }
+
+        .suspended-banner {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="notification-container" class="notification-container"></div>
+
+    <div id="modal-overlay" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <div id="modal-icon" class="modal-icon"></div>
+            <div id="modal-title" class="modal-title"></div>
+            <div id="modal-text" class="modal-text"></div>
+            <div class="modal-buttons">
+                <button id="modal-cancel-btn" class="btn-modal btn-modal-secondary">Abbrechen</button>
+                <button id="modal-confirm-btn" class="btn-modal btn-modal-primary">Bestätigen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Required Modal (Non-closeable) -->
+    <div id="setup-modal-overlay" class="custom-modal-overlay" style="z-index: 10001;">
+        <div class="custom-modal" style="width: 500px; max-width: 90vw;">
+            <div class="modal-icon" style="background:rgba(255, 179, 0, 0.1); color:#ffb300;">
+                <i data-feather="settings" style="width:32px; height:32px;"></i>
+            </div>
+            <div class="modal-title">Einrichtung erforderlich</div>
+            <div class="modal-text" style="color:var(--muted)">
+                Wir konnten das Betriebssystem deines Servers nicht automatisch erkennen. Bitte wähle das installierte
+                System aus, damit wir die Zugangsdaten generieren können.
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-top:1.5rem; width:100%;">
+                <div class="os-selection-card" onclick="selectSetupOS('Ubuntu 22.04', this)">
+                    <i data-feather="server"></i> Ubuntu 22.04
+                </div>
+                <div class="os-selection-card" onclick="selectSetupOS('Debian 13', this)">
+                    <i data-feather="box"></i> Debian 13
+                </div>
+                <div class="os-selection-card" onclick="selectSetupOS('Windows Server 2022', this)">
+                    <i data-feather="monitor"></i> Windows Server 2022
+                </div>
+            </div>
+            <div class="modal-buttons" style="margin-top:1.5rem;">
+                <button id="setup-confirm-btn" class="btn-modal btn-modal-primary" disabled
+                    onclick="submitSetupOS('{{ server.id }}')">Einrichtung abschließen</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .os-selection-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .os-selection-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .os-selection-card.selected {
+            background: rgba(238, 129, 50, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(238, 129, 50, 0.15);
+        }
+    </style>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        {% set active_page = 'dashboard' %}
+        {% set user_balance = user_session.balance if user_session is defined else (user.balance if user is defined else
+        0) %}
+        {% include 'sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="breadcrumbs">
+                Dashboard > Manage > Kvm > <span style="color:var(--accent);">#{{ server.id }}</span>
+            </div>
+
+            <div class="header-section">
+                <div class="header-title">
+                    <a href="/dashboard"
+                        style="color:white; text-decoration:none; display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; margin-right:1rem; opacity:0.6; transition: 0.3s;"
+                        onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">
+                        <i data-feather="arrow-left"></i> Zurück
+                    </a>
+                    <span
+                        class="status-badge {% if suspended %}status-suspended{% elif server.status == 'Online' %}status-online{% else %}status-offline{% endif %}"
+                        id="info-status-main">
+                        <span id="info-status-text">{% if suspended %}Gesperrt{% else %}{{ server.status }}{% endif
+                            %}</span>
+                    </span>
+                </div>
+
+                <div class="tab-menu" id="tab-menu">
+                    <div class="tab-item active" onclick="switchTab('overview', this)"><i data-feather="info"></i>
+                        Übersicht
+                    </div>
+                    <div class="tab-item" onclick="switchTab('statistics', this)"><i data-feather="bar-chart-2"></i>
+                        Statistik
+                    </div>
+                    <div class="tab-item" onclick="switchTab('ip-addresses', this)"><i data-feather="globe"></i> IP
+                        Adressen
+                    </div>
+                    <div class="tab-item" onclick="switchTab('reinstallation', this)"><i data-feather="refresh-cw"></i>
+                        Neuinstallation</div>
+                    <div class="tab-item" onclick="switchTab('console', this)"><i data-feather="terminal"></i> Konsole
+                    </div>
+                    <div class="tab-item"><i data-feather="save"></i> Backups</div>
+                    <div class="tab-item"><i data-feather="users"></i> Mitbesitzer</div>
+                    <div class="tab-item" onclick="switchTab('upgrades', this)"><i data-feather="tool"></i>
+                        Up/Downgrades</div>
+                    <div class="tab-item"><i data-feather="file-text"></i> Logs</div>
+                </div>
+            </div>
+
+            {% if suspended %}
+            <div class="suspended-banner">
+                <i data-feather="lock" style="width:24px; height:24px;"></i>
+                <div>
+                    <div style="font-size: 1.1rem; margin-bottom: 2px;">Server ist gesperrt</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8; font-weight: 400;">Dein Server wurde von einem
+                        Administrator gesperrt. Du kannst den Server aktuell nicht verwalten. Bitte kontaktiere den
+                        Support für weitere Informationen.</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="manage-grid">
+                <!-- Left Side - Content Tabs -->
+                <div class="left-panels">
+
+                    <!-- Overview Content -->
+                    <div id="overview" class="tab-content active">
+                        <div class="panel">
+                            <div class="panel-title"><i data-feather="cpu"></i> Server Informationen</div>
+                            <div class="info-grid">
+                                <div class="info-row"><span class="info-label">Hostsystem:</span><span
+                                        class="info-value">{{ server.node }}</span></div>
+                                <div class="info-row"><span class="info-label">Hostname:</span><span
+                                        class="info-value">vs{{ server.id }}</span></div>
+                                <div class="info-row"><span class="info-label">VMID:</span><span class="info-value">{{
+                                        server.id }}</span></div>
+                                <div class="info-row"><span class="info-label">User:</span><span class="info-value">{{
+                                        'Administrator' if 'Windows' in server.os else 'root' }}</span></div>
+                                <div class="info-row"><span class="info-label">Rechenzentrum:</span><span
+                                        class="info-value">SkyLink DC</span></div>
+                                <div class="info-row"><span class="info-label">Passwort:</span><span
+                                        class="info-value"><span id="server-pw-text">••••••••••</span> <i
+                                            data-feather="eye" style="width:12px; cursor:pointer;"
+                                            onclick="togglePasswordDisplay('{{ server.password }}')"></i></span></div>
+                                <div class="info-row"><span class="info-label">Restlaufzeit:</span><span
+                                        class="info-value" id="info-runtime">{{ remaining }}</span></div>
+                                <div class="info-row"><span class="info-label">Uptime:</span><span class="info-value"
+                                        id="info-uptime">{{ server.uptime_str }}</span></div>
+                                <div class="info-row"><span class="info-label">Betriebssystem:</span><span
+                                        class="info-value" id="info-os">{{ server.os }}</span>
+                                </div>
+                                <div class="info-row"><span class="info-label">DDoS Schutz:</span><span
+                                        class="info-value">PletX <i data-feather="shield"
+                                            style="width:12px; color:#00e676;"></i></span></div>
+                                <div class="info-row"><span class="info-label">Uplink:</span><span class="info-value">1
+                                        Gbit/s</span></div>
+                                <div class="info-row"><span class="info-label">IPv4-Adresse:</span><span
+                                        class="info-value">{{ server.ip }}</span></div>
+                            </div>
+                        </div>
+
+                        <div class="panel-title" style="margin-top:2rem; margin-left:0.5rem;"><i
+                                data-feather="activity"></i> Aktuelle Auslastung</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                            <div class="panel" style="background:rgba(0,0,0,0.2)">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                                    <span style="font-size:0.9rem; color:var(--muted)">CPU</span>
+                                    <span style="font-weight:bold; color:var(--accent)">{{ server.cpu_usage }}%</span>
+                                </div>
+                                <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px;">
+                                    <div class="usage-bar"
+                                        style="--usage: {{ server.cpu_usage }}%; height:100%; background:var(--accent); border-radius:3px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel" style="background:rgba(0,0,0,0.2)">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                                    <span style="font-size:0.9rem; color:var(--muted)">RAM</span>
+                                    <span style="font-weight:bold; color:var(--accent)">{{ server.ram_usage }}%</span>
+                                </div>
+                                <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px;">
+                                    <div class="usage-bar"
+                                        style="--usage: {{ server.ram_usage }}%; height:100%; background:var(--accent); border-radius:3px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Content -->
+                    <div id="statistics" class="tab-content">
+                        <div class="stat-grid-inner">
+                            <div class="panel">
+                                <div class="panel-title"><i data-feather="activity"></i> CPU Auslastung (Alle Daten)
+                                </div>
+                                <div class="chart-box">
+                                    <canvas id="cpuChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-title"><i data-feather="server"></i> RAM Auslastung (Alle Daten)</div>
+                                <div class="chart-box">
+                                    <canvas id="ramChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="panel full-width-panel">
+                                <div class="panel-title"><i data-feather="wifi"></i> Netzwerk Traffic (Alle Daten)</div>
+                                <div class="chart-box">
+                                    <canvas id="netChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Console Content -->
+                    <div id="console" class="tab-content">
+                        <div class="panel">
+                            <div class="panel-title"><i data-feather="terminal"></i> Server Konsole (NoVNC)</div>
+                            <div style="text-align:center; padding: 2rem;">
+                                <div style="margin-bottom:1.5rem; color:var(--muted);">
+                                    Hier kannst du direkt auf die Konsole deines Servers zugreifen.<br>
+                                    Bitte erlaube Pop-ups für diese Seite, damit sich das Fenster öffnen kann.
+                                </div>
+                                <button onclick="openVNC()" class="btn-action btn-vnc"
+                                    style="margin: 0 auto; display: inline-flex; width: auto; padding: 0.75rem 2rem;">
+                                    <i data-feather="external-link"></i> Konsole öffnen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IP Addresses Content -->
+                    <div id="ip-addresses" class="tab-content">
+                        <div class="panel">
+                            <div class="panel-title"><i data-feather="globe"></i> IP Adressen</div>
+                            <table class="ip-table" style="width:100%; border-collapse: collapse; margin-top: 1rem;">
+                                <thead>
+                                    <tr>
+                                        <th>IP Adresse</th>
+                                        <th>Gateway</th>
+                                        <th>rDNS</th>
+                                        <th style="text-align: right;">Typ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ server.ip }}/24 <i data-feather="copy"
+                                                onclick="copyToClipboard('{{ server.ip }}')"
+                                                style="width:14px; margin-left:5px; cursor:pointer; vertical-align: middle; opacity: 0.6;"></i>
+                                        </td>
+                                        <td>5.175.192.1 <i data-feather="copy" onclick="copyToClipboard('5.175.192.1')"
+                                                style="width:14px; margin-left:5px; cursor:pointer; vertical-align: middle; opacity: 0.6;"></i>
+                                        </td>
+                                        <td>pyrohosting.de <i data-feather="globe"
+                                                style="width:14px; margin-left:5px; cursor:pointer; vertical-align: middle; opacity: 0.6;"></i>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span class="ip-type-badge">Haupt-IP</span>
+                                        </td>
+                                    </tr>
+                                    {% for ip in server.additional_ips %}
+                                    <tr>
+                                        <td>{{ ip }}/24 <i data-feather="copy" onclick="copyToClipboard('{{ ip }}')"
+                                                style="width:14px; margin-left:5px; cursor:pointer; vertical-align: middle; opacity: 0.6;"></i>
+                                        </td>
+                                        <td>5.175.192.1 <i data-feather="copy" onclick="copyToClipboard('5.175.192.1')"
+                                                style="width:14px; margin-left:5px; cursor:pointer; vertical-align: middle; opacity: 0.6;"></i>
+                                        </td>
+                                        <td>-</td>
+                                        <td style="text-align: right;">
+                                            <span class="ip-type-badge"
+                                                style="background:rgba(41, 121, 255, 0.2); color:#2979ff;">Zusatz-IP</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Reinstallation Content -->
+                    <div id="reinstallation" class="tab-content">
+                        <div style="margin-bottom: 2rem;">
+                            <h2 style="margin: 0 0 0.5rem 0; font-size: 1.4rem;">Betriebssystemauswahl</h2>
+                            <p style="margin: 0; color: var(--muted); font-size: 0.9rem;">Wählen Sie ein Betriebssystem
+                                für die Neuinstallation Ihres Servers.</p>
+                        </div>
+
+                        <!-- Selection Grid -->
+                        <div id="os-selection-container">
+                            <div style="position: relative; margin-bottom: 2rem;">
+                                <i data-feather="search"
+                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: var(--muted);"></i>
+                                <input type="text" placeholder="Betriebssystem suchen..."
+                                    style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 0.85rem 1rem 0.85rem 3rem; border-radius: 10px; color: white; outline: none; transition: 0.3s;"
+                                    onfocus="this.style.borderColor='var(--accent)'"
+                                    onblur="this.style.borderColor='rgba(255,255,255,0.05)'">
+                            </div>
+
+                            <div class="os-section">
+                                <div class="nav-title" style="margin-bottom: 1rem; font-size: 0.9rem;">Debian</div>
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://www.debian.org/logos/openlogo-nd-100.png"
+                                            style="width:40px; margin-bottom:10px;"><span>Debian 9</span></div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://www.debian.org/logos/openlogo-nd-100.png"
+                                            style="width:40px; margin-bottom:10px;"><span>Debian 10</span></div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://www.debian.org/logos/openlogo-nd-100.png"
+                                            style="width:40px; margin-bottom:10px;"><span>Debian 11</span></div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://www.debian.org/logos/openlogo-nd-100.png"
+                                            style="width:40px; margin-bottom:10px;"><span>Debian 12</span></div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://www.debian.org/logos/openlogo-nd-100.png"
+                                            style="width:40px; margin-bottom:10px;"><span>Debian 13</span></div>
+                                </div>
+
+                                <div class="nav-title" style="margin-bottom: 1rem; font-size: 0.9rem;">Ubuntu</div>
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://assets.ubuntu.com/v1/49a1a858-ubuntu-logo-2022.svg"
+                                            style="width:40px; margin-bottom:10px;"><span>Ubuntu 18.04</span></div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://assets.ubuntu.com/v1/49a1a858-ubuntu-logo-2022.svg"
+                                            style="width:40px; margin-bottom:10px;"><span>Ubuntu 20.04</span></div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://assets.ubuntu.com/v1/49a1a858-ubuntu-logo-2022.svg"
+                                            style="width:40px; margin-bottom:10px;"><span>Ubuntu 22.04</span></div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://assets.ubuntu.com/v1/49a1a858-ubuntu-logo-2022.svg"
+                                            style="width:40px; margin-bottom:10px;"><span>Ubuntu 24.04</span></div>
+                                </div>
+
+                                <div class="nav-title" style="margin-bottom: 1rem; font-size: 0.9rem;">Windows</div>
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;">
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+                                            style="width:40px; margin-bottom:10px;"><span>Windows Server 2019</span>
+                                    </div>
+                                    <div class="os-card" onclick="selectOS(this)"><img
+                                            src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+                                            style="width:40px; margin-bottom:10px;"><span>Windows Server 2022</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirmation View -->
+                        <div id="os-confirmation-container" style="display: none; animation: fadeIn 0.3s ease-out;">
+                            <div class="warning-box">
+                                <i data-feather="alert-triangle"></i>
+                                <div>
+                                    <div
+                                        style="font-weight: 800; text-transform: uppercase; font-size: 0.75rem; margin-bottom: 2px;">
+                                        Warnung:</div>
+                                    Alle aktuellen Daten auf diesem Server werden gelöscht! Diese Aktion kann nicht
+                                    rückgängig gemacht werden.
+                                </div>
+                            </div>
+
+                            <div class="selected-os-box">
+                                <div style="color: var(--muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Ausgewähltes
+                                    Betriebssystem:</div>
+                                <div id="confirm-os-name" style="font-size: 1.2rem; font-weight: 700;">Debian 12</div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <button class="btn-secondary" onclick="cancelReinstall()">Abbrechen</button>
+                                <button class="btn-danger" onclick="confirmReinstall()">Ja, jetzt neu
+                                    installieren</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upgrades/Downgrades Content -->
+                    <div id="upgrades" class="tab-content">
+                        <div class="panel">
+                            <div class="panel-title"><i data-feather="trending-up"></i> Server Tier ändern</div>
+
+                            <div
+                                style="margin-bottom: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                                <div style="color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                    <strong>Aktueller Tier:</strong> {{ server.name }}
+                                </div>
+                                <div style="color: var(--muted); font-size: 0.9rem;">
+                                    <strong>Aktueller Preis:</strong> {{ server.price }} / Monat
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Neuen Tier
+                                    wählen:</label>
+
+                                <div class="custom-select-container" style="position: relative; width: 100%;">
+                                    <!-- Selected Value Display -->
+                                    <div id="custom-select-trigger" onclick="toggleCustomSelect()"
+                                        style="width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
+                                        <span id="custom-select-value-text" style="color: var(--muted);">-- Tier
+                                            auswählen --</span>
+                                        <i data-feather="chevron-down"
+                                            style="width: 18px; height: 18px; opacity: 0.7;"></i>
+                                    </div>
+
+                                    <!-- Hidden Standard Select (For Logic) -->
+                                    <select id="tier-select" style="display: none;">
+                                        <option value="">-- Tier auswählen --</option>
+                                        {% set current_price = server.price.replace('€', '').strip()|float %}
+                                        {% set series = server.cpu_series if server.cpu_series else 'Intel' %}
+
+                                        {% for tier_name, config in [
+                                        ('Intel Starter', {'cores': 1, 'memory': 2048, 'disk': '20G', 'price': 0.00,
+                                        'ryzen_price': 0.00}),
+                                        ('Intel Basic', {'cores': 2, 'memory': 4096, 'disk': '40G', 'price': 4.99,
+                                        'ryzen_price': 8.99}),
+                                        ('Intel Standard', {'cores': 4, 'memory': 8192, 'disk': '80G', 'price': 9.99,
+                                        'ryzen_price': 14.99}),
+                                        ('Intel Advanced', {'cores': 6, 'memory': 16384, 'disk': '120G', 'price': 13.99,
+                                        'ryzen_price': 19.99}),
+                                        ('Intel Pro', {'cores': 8, 'memory': 24576, 'disk': '160G', 'price': 18.99,
+                                        'ryzen_price': 34.99}),
+                                        ('Intel Business', {'cores': 12, 'memory': 32768, 'disk': '240G', 'price':
+                                        24.99, 'ryzen_price': 39.99})
+                                        ] %}
+                                        {% set display_name = tier_name.replace('Intel', series) if series == 'Ryzen'
+                                        else tier_name %}
+                                        {% set tier_price = config.ryzen_price if series == 'Ryzen' else config.price %}
+                                        {% if display_name != server.name %}
+                                        <option value="{{ tier_name }}" data-price="{{ tier_price }}"
+                                            data-label="{{ display_name }} - {{ config.cores }} vCores, {{ (config.memory / 1024)|int }} GB RAM, {{ config.disk }} NVMe ({{ "
+                                            %.2f"|format(tier_price) }}€/Monat)">
+                                            {{ display_name }} - {{ config.cores }} vCores, {{ (config.memory /
+                                            1024)|int }} GB RAM, {{ config.disk }} NVMe ({{ "%.2f"|format(tier_price)
+                                            }}€/Monat)
+                                        </option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+
+                                    <!-- Dropdown Options -->
+                                    <div id="custom-select-options"
+                                        style="display: none; position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px; overflow-y: auto; background: #1a1a1f; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; z-index: 100; margin-top: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                                        {% for tier_name, config in [
+                                        ('Intel Starter', {'cores': 1, 'memory': 2048, 'disk': '20G', 'price': 0.00,
+                                        'ryzen_price': 0.00}),
+                                        ('Intel Basic', {'cores': 2, 'memory': 4096, 'disk': '40G', 'price': 4.99,
+                                        'ryzen_price': 8.99}),
+                                        ('Intel Standard', {'cores': 4, 'memory': 8192, 'disk': '80G', 'price': 9.99,
+                                        'ryzen_price': 14.99}),
+                                        ('Intel Advanced', {'cores': 6, 'memory': 16384, 'disk': '120G', 'price': 13.99,
+                                        'ryzen_price': 19.99}),
+                                        ('Intel Pro', {'cores': 8, 'memory': 24576, 'disk': '160G', 'price': 18.99,
+                                        'ryzen_price': 34.99}),
+                                        ('Intel Business', {'cores': 12, 'memory': 32768, 'disk': '240G', 'price':
+                                        24.99, 'ryzen_price': 39.99})
+                                        ] %}
+                                        {% set display_name = tier_name.replace('Intel', series) if series == 'Ryzen'
+                                        else tier_name %}
+                                        {% set tier_price = config.ryzen_price if series == 'Ryzen' else config.price %}
+                                        {% if display_name != server.name %}
+                                        <div class="custom-option" data-value="{{ tier_name }}"
+                                            data-label="{{ display_name }} - {{ config.cores }} vCores, {{ (config.memory / 1024)|int }} GB RAM, {{ config.disk }} NVMe ({{ "
+                                            %.2f"|format(tier_price) }}€/Monat)" onclick="notifySelection(this)"
+                                            style="padding: 0.75rem 1rem; cursor: pointer; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc;">
+                                            <div style="font-weight: 600; color: white;">{{ display_name }}</div>
+                                            <div style="font-size: 0.8rem; color: var(--muted);">{{ config.cores }}
+                                                vCores, {{ (config.memory / 1024)|int }} GB RAM, {{ config.disk }} NVMe
+                                            </div>
+                                            <div style="font-size: 0.85rem; color: var(--accent); margin-top: 2px;">{{
+                                                "%.2f"|format(tier_price) }}€/Monat</div>
+                                        </div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                                function notifySelection(element) {
+                                    const value = element.getAttribute('data-value');
+                                    const label = element.getAttribute('data-label');
+                                    selectCustomOption(value, label);
+                                }
+                            </script>
+
+                            <div id="upgrade-info"
+                                style="display: none; margin-bottom: 1.5rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div
+                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                    <div>
+                                        <div style="color: var(--muted); font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                            Neuer Preis</div>
+                                        <div id="new-price"
+                                            style="font-size: 1.2rem; font-weight: 700; color: var(--accent);"></div>
+                                    </div>
+                                    <div>
+                                        <div style="color: var(--muted); font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                            Kosten</div>
+                                        <div id="upgrade-cost" style="font-size: 1.2rem; font-weight: 700;"></div>
+                                    </div>
+                                </div>
+                                <div
+                                    style="color: var(--muted); font-size: 0.85rem; padding: 0.75rem; background: rgba(255,179,0,0.1); border-radius: 6px; border-left: 3px solid #ffb300;">
+                                    <strong>⚠️ Wichtig:</strong> Der Server wird während des Upgrades/Downgrades
+                                    gestoppt und neu gestartet. Dies kann 2-5 Minuten dauern.
+                                </div>
+                            </div>
+
+                            <button id="upgrade-btn" onclick="showUpgradeConfirm()" disabled
+                                style="width: 100%; padding: 1rem; background: var(--accent); color: black; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; opacity: 0.5;">
+                                Tier ändern
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Side - Sidebar (Permanent) -->
+                <div class="right-panels">
+                    <div class="panel" style="margin-bottom:1.5rem;">
+                        <div class="panel-title"><i data-feather="power"></i> Server Interaktionen</div>
+                        <div class="actions-grid">
+                            <button class="btn-action btn-start" onclick="serverAction('start')" {% if suspended or
+                                server.status=='Online' %}disabled{% endif %}><i data-feather="play"></i>
+                                Starten</button>
+                            <button class="btn-action btn-stop" onclick="serverAction('stop')" {% if suspended or
+                                server.status=='Offline' %}disabled{% endif %}><i data-feather="square"></i>
+                                Stoppen</button>
+                            <button class="btn-action btn-restart" onclick="serverAction('restart')" {% if suspended or
+                                server.status=='Offline' %}disabled{% endif %}><i data-feather="rotate-cw"></i>
+                                Neustarten</button>
+                            <button class="btn-action btn-renew" onclick="renewServer()" {% if suspended %}disabled{%
+                                endif %}><i data-feather="calendar"></i>
+                                Verlängern</button>
+                            <button class="btn-action" onclick="openVNC(this)">
+                                <i data-feather="monitor"></i> Konsole
+                            </button>
+                            <button class="btn-action btn-reset" onclick="serverAction('pw-reset')" {% if suspended
+                                %}disabled{% endif %}><i data-feather="key"></i> PW Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="meta-info">
+                            <div class="meta-item">
+                                <span class="meta-icon-box"><i data-feather="calendar" style="width:14px;"></i></span>
+                                <div>
+                                    <div style="font-size:0.7rem; color:var(--muted)">Erstellt am</div>{{
+                                    server.created_at if server.created_at else 'Unbekannt' }}
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon-box meta-red"><i data-feather="clock"
+                                        style="width:14px;"></i></span>
+                                <div>
+                                    <div style="font-size:0.7rem; color:var(--muted)">Läuft aus am</div>{{
+                                    server.expiry.split(' ')[0] if server.expiry else 'Unbekannt' }}
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon-box meta-green"><i data-feather="credit-card"
+                                        style="width:14px;"></i></span>
+                                <div>
+                                    <div style="font-size:0.7rem; color:var(--muted)">Preis</div>{{ server.price }} / {{
+                                    '24h' if server.price == 'Kostenlos' else '30 Tage' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+        <script>
+            feather.replace();
+
+            // Tab Switching
+            function switchTab(tabId, target) {
+                // Update Tabs UI
+                document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+                if (target) target.classList.add('active');
+
+                // Update Content UI
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                const activeTab = document.getElementById(tabId);
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+
+                // Init charts if switch to statistics
+                if (tabId === 'statistics') {
+                    initCharts();
+                }
+            }
+
+            // OS Selection Logic
+            function selectOS(element) {
+                const osName = element.querySelector('span').innerText;
+                document.getElementById('confirm-os-name').innerText = osName;
+
+                document.getElementById('os-selection-container').style.display = 'none';
+                document.getElementById('os-confirmation-container').style.display = 'block';
+            }
+
+            function cancelReinstall() {
+                document.getElementById('os-confirmation-container').style.display = 'none';
+                document.getElementById('os-selection-container').style.display = 'block';
+            }
+
+            async function confirmReinstall() {
+                const selectedOS = document.getElementById('confirm-os-name').innerText;
+
+                const confirmed = await customConfirm(
+                    "Server Neuinstallieren",
+                    `Bist du sicher, dass du ${selectedOS} installieren möchtest? Alle Daten gehen verloren!`,
+                    "refresh-cw"
+                );
+                if (!confirmed) return;
+
+                notify("Installation gestartet", "Das Betriebssystem wird nun installiert. Bitte warten...", "info");
+
+                // Call backend for persistence
+                fetch(`/server/{{ server.id }}/reinstall`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ os: selectedOS })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update UI values in Overview
+                            document.getElementById('info-os').innerText = selectedOS;
+                            document.getElementById('info-runtime').innerText = '{{ remaining }}';
+                            document.getElementById('info-uptime').innerText = '0 Min';
+
+                            notify("Installation erfolgreich", "Der Server wird jetzt neu gestartet.", "success");
+
+                            // Switch back to Overview
+                            cancelReinstall();
+                            switchTab('overview', document.querySelector('.tab-item'));
+                        } else {
+                            notify("Fehler", data.message, "error");
+                        }
+                    })
+                    .catch(err => notify("Technischer Fehler", "Verbindung zum Server fehlgeschlagen.", "error"));
+            }
+
+            async function serverAction(action) {
+                const btn = event.currentTarget;
+                const originalContent = btn.innerHTML;
+
+                // Friendly texts for actions
+                const friendlyActions = {
+                    'start': {
+                        title: 'Server Starten',
+                        question: 'Möchtest du den Server wirklich starten?',
+                        loading: 'Server wird gestartet...',
+                        success: 'Server wurde erfolgreich gestartet! 🚀'
+                    },
+                    'stop': {
+                        title: 'Server Stoppen',
+                        question: 'Willst du den Server wirklich stoppen? Ungespeicherte Daten könnten verloren gehen.',
+                        loading: 'Server wird gestoppt...',
+                        success: 'Server wurde gestoppt. 🛑'
+                    },
+                    'restart': {
+                        title: 'Server Neustarten',
+                        question: 'Möchtest du den Server wirklich neu starten?',
+                        loading: 'Server startet neu...',
+                        success: 'Neustart erfolgreich! 🔄'
+                    },
+                    'pw-reset': {
+                        title: 'Passwort Reset',
+                        question: 'Soll das Passwort wirklich zurückgesetzt werden?',
+                        loading: 'Passwort wird geändert...',
+                        success: 'Passwort wurde geändert! 🔐'
+                    }
+                };
+
+                const texts = friendlyActions[action] || {
+                    title: 'Bestätigung',
+                    question: `Aktion '${action}' ausführen?`,
+                    loading: 'Verarbeite...',
+                    success: 'Aktion abgeschlossen.'
+                };
+
+                if (action === 'stop' || action === 'restart' || action === 'pw-reset' || action === 'start') {
+                    const confirmed = await customConfirm(
+                        texts.title,
+                        texts.question,
+                        "activity"
+                    );
+                    if (!confirmed) return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '<i data-feather="loader" class="loader"></i> ...';
+                feather.replace();
+
+                // Optional: Don't show "Befehl gesendet" toast if we want it super clean, or keep it short
+                // notify(texts.title, texts.loading, "info");
+
+                fetch(`/server/{{ server.id }}/${action}`, {
+                    method: 'POST'
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            notify("Erfolg", texts.success, "success");
+                            if (action === 'start') {
+                                document.getElementById('info-status-main').style.background = '#00e676';
+                                document.getElementById('info-status-text').innerText = 'Online';
+                            } else if (action === 'stop') {
+                                document.getElementById('info-status-main').style.background = '#ff3333';
+                                document.getElementById('info-status-text').innerText = 'Offline';
+                            } else if (action === 'pw-reset') {
+                                notify("Hinweis", "Bitte den Server einmal neu starten, damit das Passwort wirksam wird.", "warning");
+                                setTimeout(() => window.location.reload(), 2000);
+                            }
+                        } else {
+                            notify("Uups!", data.message || "Das hat leider nicht geklappt.", "error");
+                        }
+                    })
+                    .catch(e => notify("Verbindungsfehler", "Konnte den Server nicht erreichen.", "error"))
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                        feather.replace();
+                    });
+            }
+
+            // Charting Logic
+            let chartsInitialized = false;
+            const serverHistory = JSON.parse(`{{ server.history | tojson | safe }}`);
+
+            function initCharts() {
+                if (chartsInitialized || !serverHistory.length) return;
+                chartsInitialized = true;
+
+                const commonOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } } }
+                    },
+                    elements: {
+                        line: { tension: 0.4 },
+                        point: { radius: 0, hoverRadius: 5 }
+                    }
+                };
+
+                const labels = serverHistory.map(h => h.time);
+
+                // CPU Chart
+                new Chart(document.getElementById('cpuChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: serverHistory.map(h => h.cpu),
+                            borderColor: '#cc33ff',
+                            backgroundColor: 'rgba(204, 51, 255, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: commonOptions
+                });
+
+                // RAM Chart
+                new Chart(document.getElementById('ramChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: serverHistory.map(h => h.mem),
+                            borderColor: '#00e676',
+                            backgroundColor: 'rgba(0, 230, 118, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: commonOptions
+                });
+
+                // Net Chart
+                new Chart(document.getElementById('netChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'In (MB)',
+                            data: serverHistory.map(h => h.netin),
+                            borderColor: '#ffb300',
+                            backgroundColor: 'rgba(255, 179, 0, 0.1)',
+                            fill: true
+                        }, {
+                            label: 'Out (MB)',
+                            data: serverHistory.map(h => h.netout),
+                            borderColor: '#2979ff',
+                            backgroundColor: 'rgba(41, 121, 255, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: { ...commonOptions, elements: { line: { tension: 0.1 } } }
+                });
+            }
+
+            /* --- Notify System JS --- */
+            function notify(title, message, type = 'info') {
+                const container = document.getElementById('notification-container');
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+
+                const icons = {
+                    success: 'check-circle',
+                    error: 'x-circle',
+                    info: 'info',
+                    warning: 'alert-triangle'
+                };
+
+                toast.innerHTML = `
+                    <div class="toast-icon"><i data-feather="${icons[type]}"></i></div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                `;
+
+                container.appendChild(toast);
+                feather.replace();
+
+                setTimeout(() => {
+                    toast.classList.add('closing');
+                    setTimeout(() => toast.remove(), 400);
+                }, 4000);
+            }
+
+            function customConfirm(title, text, icon = 'help-circle') {
+                return new Promise((resolve) => {
+                    const overlay = document.getElementById('modal-overlay');
+                    const iconBox = document.getElementById('modal-icon');
+                    const titleBox = document.getElementById('modal-title');
+                    const textBox = document.getElementById('modal-text');
+                    const confirmBtn = document.getElementById('modal-confirm-btn');
+                    const cancelBtn = document.getElementById('modal-cancel-btn');
+
+                    iconBox.innerHTML = `<i data-feather="${icon}" style="width:32px; height:32px;"></i>`;
+                    titleBox.innerText = title;
+                    textBox.innerText = text;
+                    feather.replace();
+
+                    overlay.classList.add('active');
+
+                    const handleConfirm = () => {
+                        overlay.classList.remove('active');
+                        resolve(true);
+                        cleanup();
+                    };
+
+                    const handleCancel = () => {
+                        overlay.classList.remove('active');
+                        resolve(false);
+                        cleanup();
+                    };
+
+                    const cleanup = () => {
+                        confirmBtn.removeEventListener('click', handleConfirm);
+                        cancelBtn.removeEventListener('click', handleCancel);
+                    };
+
+                    confirmBtn.addEventListener('click', handleConfirm);
+                    cancelBtn.addEventListener('click', handleCancel);
+                });
+            }
+
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text);
+                notify('Kopiert!', 'Information wurde in die Zwischenablage kopiert.', 'success');
+            }
+
+            // Snowfall Effect (Reused)
+            function createSnowflake() {
+                const snowflake = document.createElement('div');
+                snowflake.innerHTML = '❄';
+                snowflake.classList.add('snowflake');
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.opacity = Math.random();
+                snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                const duration = Math.random() * 5 + 5;
+                snowflake.style.animationDuration = duration + 's';
+                document.body.appendChild(snowflake);
+                setTimeout(() => snowflake.remove(), duration * 1000);
+            }
+            setInterval(createSnowflake, 300);
+
+            async function renewServer() {
+                const confirmed = await customConfirm(
+                    "Server verlängern?",
+                    "Möchtest du deinen Server wirklich für {{ server.price }} um 30 Tage verlängern? Das Geld wird direkt von deinem Guthaben abgezogen.",
+                    "calendar"
+                );
+
+                if (!confirmed) return;
+
+                try {
+                    const res = await fetch(`/server/{{ server.id }}/renew`, { mechanism: 'POST', method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        notify("Erfolg!", data.message, "success");
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        notify("Fehler", data.message, "error");
+                    }
+                } catch (e) {
+                    notify("Fehler", "Verbindung zum Server fehlgeschlagen.", "error");
+                }
+            }
+
+            function openVNC(btnElement) {
+                const width = 1000;
+                const height = 700;
+                const left = (screen.width - width) / 2;
+                const top = (screen.height - height) / 2;
+
+                const btn = btnElement || document.querySelector('.btn-vnc');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<div class="loader-spinner" style="width:16px; height:16px; border-width:2px; display:inline-block;"></div> Lade...';
+
+                fetch(`/server/{{ server.id }}/console`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.open(data.url, 'Proxmox NoVNC', `width=${width},height=${height},top=${top},left=${left}`);
+                        } else {
+                            notify("Fehler", data.message, "error");
+                        }
+                    })
+                    .catch(e => notify("Fehler", "Verbindung fehlgeschlagen", "error"))
+                    .finally(() => {
+                        btn.innerHTML = originalText;
+                        feather.replace();
+                    });
+            }
+
+            // Setup OS Logic
+            let selectedSetupOS = null;
+
+            function selectSetupOS(osName, el) {
+                selectedSetupOS = osName;
+                document.querySelectorAll('.os-selection-card').forEach(c => c.classList.remove('selected'));
+                el.classList.add('selected');
+                document.getElementById('setup-confirm-btn').disabled = false;
+            }
+
+            function submitSetupOS(serverId) {
+                if (!selectedSetupOS) return;
+
+                const btn = document.getElementById('setup-confirm-btn');
+                const originalText = btn.innerText;
+                btn.disabled = true;
+                btn.innerHTML = '<div class="loader-spinner" style="width:16px; height:16px; border-width:2px;"></div>';
+
+                fetch(`/server/${serverId}/complete_setup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ os: selectedSetupOS })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            notify("Erfolg", "Einrichtung abgeschlossen! Server wird neu gestartet...", "success");
+                            setTimeout(() => window.location.reload(), 2000);
+                        } else {
+                            notify("Fehler", data.message, "error");
+                            btn.disabled = false;
+                            btn.innerText = originalText;
+                        }
+                    })
+                    .catch(e => {
+                        notify("Fehler", "Verbindung fehlgeschlagen", "error");
+                        btn.disabled = false;
+                        btn.innerText = originalText;
+                    });
+            }
+
+            // Check if setup is required on load
+            window.addEventListener('load', () => {
+                const currentOS = document.getElementById('info-os').innerText.trim();
+                // Check if OS is Proxmox, Unknown, or placeholder
+                if (currentOS === 'Proxmox' || currentOS === 'Unknown' || currentOS === 'None') {
+                    document.getElementById('setup-modal-overlay').classList.add('active');
+                }
+            });
+
+            function togglePasswordDisplay(pw) {
+                const el = document.getElementById('server-pw-text');
+                if (el.innerText === '••••••••••') {
+                    el.innerText = pw;
+                } else {
+                    el.innerText = '••••••••••';
+                }
+            }
+
+            // Upgrade/Downgrade Functions
+            let selectedTier = null;
+            let selectedPrice = 0;
+            let upgradeCost = 0;
+
+            function calculateUpgradeCost() {
+                const select = document.getElementById('tier-select');
+                const option = select.options[select.selectedIndex];
+
+                if (!option.value) {
+                    document.getElementById('upgrade-info').style.display = 'none';
+                    document.getElementById('upgrade-btn').disabled = true;
+                    document.getElementById('upgrade-btn').style.opacity = '0.5';
+                    document.getElementById('upgrade-btn').style.cursor = 'not-allowed';
+                    return;
+                }
+
+                selectedTier = option.value;
+                selectedPrice = parseFloat(option.dataset.price);
+                const currentPrice = parseFloat('{{ server.price.replace("€", "").strip() }}');
+                const priceDiff = selectedPrice - currentPrice;
+
+                // Apply 20% premium for upgrades
+                if (priceDiff > 0) {
+                    upgradeCost = priceDiff * 1.2;
+                } else {
+                    upgradeCost = priceDiff; // Negative for downgrades
+                }
+
+                // Show info
+                document.getElementById('upgrade-info').style.display = 'block';
+                document.getElementById('new-price').innerText = selectedPrice.toFixed(2) + '€/Monat';
+
+                if (upgradeCost > 0) {
+                    document.getElementById('upgrade-cost').innerText = '+' + upgradeCost.toFixed(2) + '€';
+                    document.getElementById('upgrade-cost').style.color = '#00e676';
+                } else {
+                    document.getElementById('upgrade-cost').innerText = upgradeCost.toFixed(2) + '€';
+                    document.getElementById('upgrade-cost').style.color = '#2979ff';
+                }
+
+                // Enable button
+                document.getElementById('upgrade-btn').disabled = false;
+                document.getElementById('upgrade-btn').style.opacity = '1';
+                document.getElementById('upgrade-btn').style.cursor = 'pointer';
+            }
+
+            // Custom Dropdown Logic
+            function toggleCustomSelect() {
+                const options = document.getElementById('custom-select-options');
+                const trigger = document.getElementById('custom-select-trigger');
+                if (options.style.display === 'block') {
+                    options.style.display = 'none';
+                    trigger.style.borderColor = 'rgba(255,255,255,0.1)';
+                } else {
+                    options.style.display = 'block';
+                    trigger.style.borderColor = 'var(--accent)';
+                }
+            }
+
+            function selectCustomOption(value, label) {
+                // Update specific text display part
+                // The label passed includes the full text, we want to show it
+                document.getElementById('custom-select-value-text').innerText = label;
+                document.getElementById('custom-select-value-text').style.color = 'white';
+
+                // Update hidden select
+                const select = document.getElementById('tier-select');
+                select.value = value;
+
+                // Close dropdown
+                document.getElementById('custom-select-options').style.display = 'none';
+                document.getElementById('custom-select-trigger').style.borderColor = 'rgba(255,255,255,0.1)';
+
+                // Trigger calculation
+                calculateUpgradeCost();
+            }
+
+            // Close dropdown when clicking outside
+            window.addEventListener('click', function (e) {
+                const container = document.querySelector('.custom-select-container');
+                if (container && !container.contains(e.target)) {
+                    document.getElementById('custom-select-options').style.display = 'none';
+                    const trigger = document.getElementById('custom-select-trigger');
+                    if (trigger) trigger.style.borderColor = 'rgba(255,255,255,0.1)';
+                }
+            });
+
+            function showUpgradeConfirm() {
+                if (!selectedTier) return;
+
+                const select = document.getElementById('tier-select');
+                const tierName = select.options[select.selectedIndex].text.split(' - ')[0];
+
+                const confirmed = confirm(
+                    `Möchten Sie wirklich zu "${tierName}" wechseln?\n\n` +
+                    `Neuer Preis: ${selectedPrice.toFixed(2)}€/Monat\n` +
+                    `Kosten: ${upgradeCost > 0 ? '+' : ''}${upgradeCost.toFixed(2)}€\n\n` +
+                    `Der Server wird während des Vorgangs gestoppt und neu gestartet (2-5 Minuten).`
+                );
+
+                if (confirmed) {
+                    performUpgrade();
+                }
+            }
+
+            function performUpgrade() {
+                const btn = document.getElementById('upgrade-btn');
+                btn.disabled = true;
+                btn.innerText = 'Wird durchgeführt...';
+                btn.style.opacity = '0.5';
+
+                fetch('/server/{{ server.id }}/upgrade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tier: selectedTier })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('✅ ' + data.message);
+                            window.location.reload();
+                        } else {
+                            alert('❌ Fehler: ' + data.message);
+                            btn.disabled = false;
+                            btn.innerText = 'Tier ändern';
+                            btn.style.opacity = '1';
+                        }
+                    })
+                    .catch(err => {
+                        alert('❌ Fehler: ' + err.message);
+                        btn.disabled = false;
+                        btn.innerText = 'Tier ändern';
+                        btn.style.opacity = '1';
+                    });
+            }
+
+            // Load icons
+            feather.replace();
+        </script>
+</body>
+
+</html>

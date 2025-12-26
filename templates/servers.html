@@ -1,0 +1,588 @@
+{% extends "base.html" %}
+
+{% block title %}Servers - PyroHosting{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 6rem; padding-bottom: 2rem;">
+    <div class="container text-center">
+        <h1>High Performance <span class="text-accent">Intel/Ryzen Servers</span></h1>
+        <p style="color: var(--muted); max-width: 600px; margin: 0 auto;">Dedicated hardware for maximum performance.
+        </p>
+    </div>
+</section>
+
+<section class="servers-list" style="padding: 2rem 0 6rem 0;">
+    <div class="container">
+        <!-- Grid layout -->
+        <!-- Toggle Switch -->
+        <div class="server-toggle-container">
+            <div class="server-toggle">
+                <button class="toggle-btn active" onclick="switchServerType('intel')">Intel Xeon</button>
+                <button class="toggle-btn" onclick="switchServerType('ryzen')">AMD Ryzen</button>
+            </div>
+        </div>
+
+        <!-- Intel Grid -->
+        <div id="intel-servers" class="features-grid"
+            style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+
+            <!-- Intel Starter (Core) -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="cpu"></i>
+                    </div>
+                    <h3 class="server-title">Core</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-label">24 HOURS FREE</div>
+                    <div class="price-container">
+                        <span class="price-main">Free</span>
+                    </div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Intel Xeon 2697v4</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>2 vCores @ ~3.6 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>4GB DDR4 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>40GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Intel Basic (Boost) -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="zap"></i>
+                    </div>
+                    <h3 class="server-title">Boost</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€7.99</span>
+                        <span class="price-main">€4.99</span>
+                    </div>
+                    <div class="price-period">€4.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Intel Xeon 2697v4</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>4 vCores @ ~3.6 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>8GB DDR4 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>80GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Intel Standard (Power / Popular) -->
+            <div class="server-card popular">
+                <div class="most-popular-badge">Most Popular</div>
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="activity"></i>
+                    </div>
+                    <h3 class="server-title">Power</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€12.99</span>
+                        <span class="price-main">€9.99</span>
+                    </div>
+                    <div class="price-period">€9.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Intel Xeon 2697v4</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>6 vCores @ ~3.6 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>16GB DDR4 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>120GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Intel Advanced (Extreme) -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="layers"></i>
+                    </div>
+                    <h3 class="server-title">Extreme</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€15.99</span>
+                        <span class="price-main">€13.99</span>
+                    </div>
+                    <div class="price-period">€13.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Intel Xeon 2697v4</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>8 vCores @ ~3.6 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>24GB DDR4 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>160GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Intel Pro -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="box"></i>
+                    </div>
+                    <h3 class="server-title">Pro</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€22.99</span>
+                        <span class="price-main">€18.99</span>
+                    </div>
+                    <div class="price-period">€18.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Intel Xeon 2697v4</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>12 vCores @ ~3.6 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>32GB DDR4 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>200GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Intel Business -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="briefcase"></i>
+                    </div>
+                    <h3 class="server-title">Business</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€29.99</span>
+                        <span class="price-main">€24.99</span>
+                    </div>
+                    <div class="price-period">€24.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Intel Xeon 2697v4</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>14 vCores @ ~3.6 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>40GB DDR4 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>250GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+        </div>
+
+        <!-- Ryzen Grid (Hidden by default) -->
+        <div id="ryzen-servers" class="features-grid"
+            style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+
+            <!-- Ryzen Basic (Boost) -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="zap"></i>
+                    </div>
+                    <h3 class="server-title">Boost</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€11.99</span>
+                        <span class="price-main">€8.99</span>
+                    </div>
+                    <div class="price-period">€8.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Ryzen 9 7950X3D</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>4 vCores @ ~5.7 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>8GB DDR5 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>80GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Ryzen Standard (Power) -->
+            <div class="server-card popular">
+                <div class="most-popular-badge">Top Performer</div>
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="activity"></i>
+                    </div>
+                    <h3 class="server-title">Power</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€18.99</span>
+                        <span class="price-main">€14.99</span>
+                    </div>
+                    <div class="price-period">€14.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Ryzen 9 7950X3D</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>6 vCores @ ~5.7 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>16GB DDR5 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>120GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Ryzen Advanced (Extreme) -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="layers"></i>
+                    </div>
+                    <h3 class="server-title">Extreme</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€24.99</span>
+                        <span class="price-main">€19.99</span>
+                    </div>
+                    <div class="price-period">€19.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Ryzen 9 7950X3D</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>8 vCores @ ~5.7 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>24GB DDR5 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>160GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Ryzen Pro -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="box"></i>
+                    </div>
+                    <h3 class="server-title">Pro</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€39.99</span>
+                        <span class="price-main">€34.99</span>
+                    </div>
+                    <div class="price-period">€34.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Ryzen 9 7950X3D</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>12 vCores @ ~5.7 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>32GB DDR5 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>200GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+
+            <!-- Ryzen Business -->
+            <div class="server-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i data-feather="briefcase"></i>
+                    </div>
+                    <h3 class="server-title">Business</h3>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <span class="price-strike">€49.99</span>
+                        <span class="price-main">€39.99</span>
+                    </div>
+                    <div class="price-period">€39.99/month</div>
+                </div>
+
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <i data-feather="terminal"></i>
+                        <span>Ryzen 9 7950X3D</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="zap"></i>
+                        <span>14 vCores @ ~5.7 GHz</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="cpu"></i>
+                        <span>40GB DDR5 RAM</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="hard-drive"></i>
+                        <span>250GB NVMe Storage</span>
+                    </div>
+                    <div class="spec-item">
+                        <i data-feather="shield"></i>
+                        <span>Always-On DDoS Protection</span>
+                    </div>
+                </div>
+
+                <a href="/login" class="btn-configure">Configure Server</a>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const intelGrid = document.getElementById('intel-servers');
+                const ryzenGrid = document.getElementById('ryzen-servers');
+
+                // Force layout state
+                intelGrid.style.display = 'grid';
+                ryzenGrid.style.display = 'none';
+
+                // Manage classes for fade state
+                intelGrid.classList.remove('hidden', 'fade-out');
+                ryzenGrid.classList.add('hidden');
+
+                if (feather) feather.replace();
+            });
+
+            function switchServerType(type) {
+                const intelGrid = document.getElementById('intel-servers');
+                const ryzenGrid = document.getElementById('ryzen-servers');
+                const btns = document.querySelectorAll('.toggle-btn');
+
+                let activeGrid, inactiveGrid;
+
+                if (type === 'intel') {
+                    activeGrid = intelGrid;
+                    inactiveGrid = ryzenGrid;
+                    btns[0].classList.add('active');
+                    btns[1].classList.remove('active');
+                } else {
+                    activeGrid = ryzenGrid;
+                    inactiveGrid = intelGrid;
+                    btns[0].classList.remove('active');
+                    btns[1].classList.add('active');
+                }
+
+                // If target is already active (visible), do nothing
+                if (activeGrid.style.display !== 'none') return;
+
+                // 1. Fade out current
+                inactiveGrid.classList.add('fade-out');
+
+                // 2. Wait, then Swap
+                setTimeout(() => {
+                    // Hide inactive
+                    inactiveGrid.style.display = 'none';
+                    inactiveGrid.classList.add('hidden');
+                    inactiveGrid.classList.remove('fade-out');
+
+                    // Show active
+                    activeGrid.style.display = 'grid'; // FORCE GRID
+                    activeGrid.classList.remove('hidden');
+                    activeGrid.classList.add('fade-out'); // Start transparent
+
+                    // Force reflow
+                    void activeGrid.offsetWidth;
+
+                    // Fade in
+                    activeGrid.classList.remove('fade-out');
+
+                    if (feather) feather.replace();
+                }, 300);
+            }
+        </script>
+    </div>
+    </div>
+</section>
+{% endblock %}

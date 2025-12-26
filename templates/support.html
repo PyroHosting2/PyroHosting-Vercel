@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Support - PyroHosting{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 6rem; padding-bottom: 2rem;">
+    <div class="container text-center">
+        <h1>Need <span class="text-accent">Help?</span></h1>
+        <p style="color: var(--muted); max-width: 600px; margin: 0 auto;">Our team is here to assist you 24/7.</p>
+    </div>
+</section>
+
+<section class="support-options" style="padding: 4rem 0;">
+    <div class="container">
+        <div class="features-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="glass-panel feature-card text-center" style="text-align: center;">
+                <div class="feature-icon" style="margin: 0 auto 1rem auto;"><i data-feather="message-circle"></i></div>
+                <h3>Discord Community</h3>
+                <p>Join our active community for quick help, announcements, and giveaways.</p>
+                <a href="https://discord.gg/rhrM8QqrnF" target="_blank" class="btn btn-accent"
+                    style="margin-top: 1rem;">Join Discord</a>
+            </div>
+            <div class="glass-panel feature-card text-center" style="text-align: center;">
+                <div class="feature-icon" style="margin: 0 auto 1rem auto;"><i data-feather="mail"></i></div>
+                <h3>Ticket System</h3>
+                <p>For account specific issues or billing inquiries, open a support ticket.</p>
+                <a href="#" class="btn btn-secondary" style="margin-top: 1rem;">Open Ticket</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

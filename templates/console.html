@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Console: {{ server.name }}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #noVNC_screen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .status-bar {
+            background: #1a1a1a;
+            color: #aaa;
+            padding: 5px 10px;
+            font-family: sans-serif;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #333;
+        }
+    </style>
+    <!-- Use standard NoVNC script (generic module approach or simple include) -->
+    <!-- We'll use a simple RFB wrapper from a CDN or embedded script logic -->
+    <script src="https://cdn.jsdelivr.net/npm/@novnc/novnc@1.4.0/core/rfb.js" type="module"></script>
+</head>
+
+<body>
+    <div class="status-bar">
+        <span>Server: {{ server.name }} ({{ server.ip }})</span>
+        <span id="status">Verbinde...</span>
+    </div>
+    <div id="noVNC_screen"></div>
+
+    <script type="module">
+        import RFB from 'https://cdn.jsdelivr.net/npm/@novnc/novnc@1.4.0/core/rfb.js';
+
+        const host = "{{ vnc.host }}";
+        const port = "8006"; // Standard Proxmox Port
+        const node = "{{ vnc.node }}";
+        const vmid = "{{ server.id }}";
+        const vncticket = "{{ vnc.ticket | safe }}";
+        const pve_ticket = "{{ vnc.pve_ticket | safe }}";
+
+        // Dynamic Protocol from Backend (ws or wss) - User requested simple HTTP support
+        // If the user insists on "http", they might mean ws:// connection to Proxmox
+        // But we respect what Proxmox is configured as.
+        const protocol = "{{ vnc.protocol }}";
+
+        // Construct WebSocket URL
+        const ws_port = "{{ vnc.port }}";
+        const url = `${protocol}://${host}:${port}/api2/json/nodes/${node}/qemu/${vmid}/vncwebsocket?port=${ws_port}&vncticket=${encodeURIComponent(vncticket)}`;
+
+        // Cookie Handling: If we are on HTTP, we MUST NOT use 'secure' flag.
+        const isSecure = location.protocol === 'https:';
+        // SameSite=None requires Secure. If not Secure, use Lax or Strict.
+        const cookieOpts = isSecure ? "secure; samesite=none" : "path=/";
+
+        document.cookie = `PVEAuthCookie=${pve_ticket}; ${cookieOpts}`;
+
+        const rfb = new RFB(document.getElementById('noVNC_screen'), url, {
+            credentials: { password: vncticket }
+        });
+
+        const statusEl = document.getElementById('status');
+
+        rfb.addEventListener("connect", () => { statusEl.innerText = "Verbunden"; statusEl.style.color = "#00e676"; });
+        rfb.addEventListener("disconnect", () => { statusEl.innerText = "Getrennt"; statusEl.style.color = "#ff3333"; });
+        rfb.addEventListener("credentialsrequired", () => { statusEl.innerText = "Passwort benötigt (Sollte automatisch sein)"; });
+
+        // Resize handling
+        rfb.scaleViewport = true;
+        rfb.resizeSession = true;
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domains - PyroHosting</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Reusing styles from dashboard */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar (Synced) */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 12, 0.95);
+            border-right: none;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-brand span {
+            color: var(--accent);
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(238, 129, 50, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .badge-new {
+            background: #ff9800;
+            color: black;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Snow & Lights */
+        .holiday-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .light-string {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .light-bulb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: flash 1s infinite alternate;
+            position: relative;
+            top: -5px;
+        }
+
+        @keyframes flash {
+            from {
+                opacity: 0.5;
+            }
+
+            to {
+                opacity: 1;
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 1000;
+            color: white;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(-5vw);
+            }
+
+            100% {
+                transform: translateY(110vh) translateX(5vw);
+            }
+        }
+
+        /* Domain Search Styles */
+        .page-header {
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .page-header p {
+            color: var(--muted);
+        }
+
+        .search-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .domain-input {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            color: white;
+            font-size: 1.1rem;
+            font-family: inherit;
+        }
+
+        .domain-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn-check {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-check:hover {
+            background: #ff9f5a;
+            transform: translateY(-2px);
+        }
+
+        .search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .domain-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            background: rgba(0, 230, 118, 0.1);
+            color: #00e676;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .domain-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-right: 1.5rem;
+        }
+
+        .btn-cart {
+            background: white;
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-cart:hover {
+            background: #f0f0f0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        {% set active_page = 'domains' %}
+        {% set user_balance = user.balance if user is defined else (user_session.balance if user_session is defined else
+        0) %}
+        {% include 'sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Holiday Lights -->
+            <div class="light-string">
+                <div class="light-bulb" style="background:red; box-shadow:0 0 10px red; animation-delay:0s"></div>
+                <div class="light-bulb" style="background:blue; box-shadow:0 0 10px blue; animation-delay:1.4s"></div>
+                <div class="light-bulb" style="background:lime; box-shadow:0 0 10px lime; animation-delay:2.8s"></div>
+            </div>
+
+            <div class="page-header">
+                <h1>Domains</h1>
+                <p>Sichere dir jetzt deine Wunschdomain zum Bestpreis.</p>
+            </div>
+
+            <form method="POST" class="search-container">
+                <input type="text" name="domain_name" class="domain-input"
+                    placeholder="Wunschdomain eingeben (z.B. pyrohosting)" value="{{ search_term }}" required>
+                <button type="submit" class="btn-check">
+                    <i data-feather="search"></i> Prüfen
+                </button>
+            </form>
+
+            {% if search_term %}
+            <div class="search-results">
+                <h3 style="color:var(--muted); margin-bottom:1rem;">Suchergebnisse für "{{ search_term }}"</h3>
+
+                {% for result in results %}
+                <div class="result-card {{ 'available' if result.status == 'available' else 'taken' }}">
+                    <div class="domain-info">
+                        <div class="domain-name">
+                            {{ result.name }}
+                            {% if result.status == 'available' %}
+                            <span class="status-badge">Verfügbar</span>
+                            {% else %}
+                            <span class="status-badge"
+                                style="background: rgba(255, 51, 51, 0.1); color: #ff3333;">Vergeben</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        {% if result.status == 'available' %}
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; margin-right: 1.5rem;">
+                            <span class="domain-price" style="margin-right:0; color:var(--accent);">{{ result.price }}
+                                €</span>
+                        </div>
+
+                        {% if result.can_buy %}
+                        <button class="btn-cart" onclick="openDiscordModal()">
+                            <i data-feather="shopping-cart" style="width:16px;"></i> Bestellen
+                        </button>
+                        {% else %}
+                        <button class="btn-cart" style="opacity:0.5; cursor:not-allowed;" disabled
+                            title="Originalpreis über 50€">
+                            <i data-feather="lock" style="width:16px;"></i> Limit >50€
+                        </button>
+                        {% endif %}
+
+                        {% else %}
+                        <span class="domain-price" style="color:var(--muted); text-decoration: line-through;">{{
+                            result.original_price }} €</span>
+                        <button class="btn-cart" style="opacity:0.5; cursor:not-allowed;" disabled>
+                            <i data-feather="x-circle" style="width:16px;"></i> Vergeben
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+            {% else %}
+            <div style="text-align:center; padding: 4rem; color: var(--muted); opacity: 0.5;">
+                <i data-feather="globe" style="width:64px; height:64px; margin-bottom:1rem;"></i>
+                <p>Gib einen Namen ein um die Verfügbarkeit zu prüfen.</p>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Discord Join Modal -->
+    <div id="discord-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center;">
+        <div
+            style="background:rgba(20,20,25,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:3rem; max-width:450px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+            <div
+                style="width:80px; height:80px; background:rgba(88,101,242,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; color:#5865F2;">
+                <i data-feather="message-circle" style="width:40px; height:40px;"></i>
+            </div>
+            <h2 style="color:white; margin-bottom:1rem;">Discord beitreten</h2>
+            <p style="color:var(--muted); margin-bottom:2rem; line-height:1.6;">Um eine Domain zu bestellen, musst du
+                unserem Discord-Server beitreten und ein Ticket eröffnen.</p>
+            <a href="https://discord.gg/rhrM8QqrnF" target="_blank" class="btn-check"
+                style="display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none; margin-bottom:1rem; width:100%; justify-content:center;">
+                <i data-feather="external-link"></i> Jetzt Beitreten
+            </a>
+            <button onclick="closeDiscordModal()"
+                style="background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:0.9rem; text-decoration:underline;">Schließen</button>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+        // Snowfall (Reused)
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.innerHTML = '❄';
+            snowflake.classList.add('snowflake');
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            const duration = Math.random() * 5 + 5;
+            snowflake.style.animationDuration = duration + 's';
+            document.body.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), duration * 1000);
+        }
+        setInterval(createSnowflake, 200);
+
+        function openDiscordModal() {
+            document.getElementById('discord-modal').style.display = 'flex';
+        }
+        function closeDiscordModal() {
+            document.getElementById('discord-modal').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

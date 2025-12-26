@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .tos-container {
+        max-width: 900px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+
+    .tos-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .tos-header h1 {
+        font-size: 2.5rem;
+        color: #F97316;
+        margin-bottom: 0.5rem;
+    }
+
+    .tos-header p {
+        color: var(--muted);
+        font-size: 0.95rem;
+    }
+
+    .tos-content {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 3rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .tos-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .tos-section h2 {
+        color: var(--accent);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tos-section h3 {
+        color: var(--secondary);
+        font-size: 1.2rem;
+        margin: 1.5rem 0 0.75rem 0;
+    }
+
+    .tos-section p,
+    .tos-section li {
+        color: var(--muted);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+
+    .tos-section ul {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .tos-section li {
+        margin-bottom: 0.5rem;
+    }
+
+    .highlight-box {
+        background: rgba(168, 85, 247, 0.1);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+    }
+
+    .highlight-box p {
+        margin: 0;
+        color: white;
+    }
+
+    .last-updated {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+</style>
+
+<div class="tos-container">
+    <div class="tos-header">
+        <h1>Nutzungsbedingungen</h1>
+        <p>Bitte lesen Sie diese Bedingungen sorgfältig durch, bevor Sie unsere Dienste nutzen</p>
+    </div>
+
+    <div class="tos-content">
+        <div class="tos-section">
+            <h2><i data-feather="file-text"></i> 1. Geltungsbereich</h2>
+            <p>Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für alle Verträge zwischen PyroHosting und dem Kunden
+                über die Bereitstellung von Virtual Private Servern (VPS), Webhosting und damit verbundenen
+                Dienstleistungen.</p>
+            <p>Mit der Registrierung und Nutzung unserer Dienste akzeptiert der Kunde diese AGB in ihrer jeweils
+                gültigen Fassung.</p>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="user-check"></i> 2. Vertragsschluss</h2>
+            <p>Der Vertrag kommt durch die Bestellung des Kunden und unsere Annahme zustande. Die Annahme erfolgt durch:
+            </p>
+            <ul>
+                <li>Bereitstellung der bestellten Dienste</li>
+                <li>Versand der Zugangsdaten per E-Mail</li>
+                <li>Ausdrückliche Auftragsbestätigung</li>
+            </ul>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="credit-card"></i> 3. Preise und Zahlung</h2>
+            <h3>3.1 Preise</h3>
+            <p>Alle Preise verstehen sich als Bruttopreise inklusive der gesetzlichen Mehrwertsteuer. Die aktuellen
+                Preise sind auf unserer Website einsehbar.</p>
+
+            <h3>3.2 Zahlungsbedingungen</h3>
+            <ul>
+                <li>Zahlung erfolgt im Voraus für den gewählten Abrechnungszeitraum</li>
+                <li>Akzeptierte Zahlungsmethoden: PayPal, Kreditkarte, Überweisung</li>
+                <li>Bei Zahlungsverzug behalten wir uns vor, den Dienst zu sperren</li>
+            </ul>
+
+            <div class="highlight-box">
+                <p><strong>Wichtig:</strong> Kostenlose Server haben eine Laufzeit von 24 Stunden und können nur einmal
+                    pro Account beansprucht werden.</p>
+            </div>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="shield"></i> 4. Pflichten des Kunden</h2>
+            <p>Der Kunde verpflichtet sich:</p>
+            <ul>
+                <li>Die Dienste nur für legale Zwecke zu nutzen</li>
+                <li>Keine Spam-Mails oder illegale Inhalte zu verbreiten</li>
+                <li>Keine DDoS-Angriffe oder Hacking-Versuche durchzuführen</li>
+                <li>Die Serverressourcen nicht missbräuchlich zu nutzen (z.B. Crypto Mining)</li>
+                <li>Zugangsdaten vertraulich zu behandeln</li>
+            </ul>
+
+            <div class="highlight-box">
+                <p><strong>Verboten:</strong> Hosting von illegalen Inhalten, Phishing-Seiten, Malware, Botnetzen,
+                    Crypto Mining oder
+                    anderen schädlichen Aktivitäten.</p>
+            </div>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="clock"></i> 5. Verfügbarkeit und Support</h2>
+            <h3>5.1 Verfügbarkeit</h3>
+            <p>Wir streben eine Verfügbarkeit von 99,9% an. Geplante Wartungsarbeiten werden rechtzeitig angekündigt.
+            </p>
+
+            <h3>5.2 Support</h3>
+            <p>Unser Support-Team steht Ihnen via Ticket-System und Discord zur Verfügung. Die durchschnittliche
+                Reaktionszeit beträgt 24 Stunden.</p>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="refresh-cw"></i> 6. Kündigung</h2>
+            <p>Beide Parteien können den Vertrag mit einer Frist von 14 Tagen zum Ende des Abrechnungszeitraums
+                kündigen.</p>
+            <p>Eine außerordentliche Kündigung ist bei schwerwiegenden Verstößen gegen diese AGB möglich.</p>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="database"></i> 7. Datenschutz</h2>
+            <p>Wir verarbeiten personenbezogene Daten gemäß der DSGVO. Weitere Informationen finden Sie in unserer
+                Datenschutzerklärung.</p>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="alert-triangle"></i> 8. Haftung</h2>
+            <p>Wir haften nur für Vorsatz und grobe Fahrlässigkeit. Die Haftung für Datenverlust ist auf den typischen,
+                vorhersehbaren Schaden begrenzt.</p>
+            <p>Der Kunde ist für regelmäßige Backups seiner Daten selbst verantwortlich.</p>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="edit"></i> 9. Änderungen der AGB</h2>
+            <p>Wir behalten uns vor, diese AGB zu ändern. Änderungen werden dem Kunden per E-Mail mitgeteilt und gelten
+                als akzeptiert, wenn nicht innerhalb von 14 Tagen widersprochen wird.</p>
+        </div>
+
+        <div class="tos-section">
+            <h2><i data-feather="book"></i> 10. Schlussbestimmungen</h2>
+            <p>Es gilt das Recht der Bundesrepublik Deutschland. Sollten einzelne Bestimmungen unwirksam sein, bleibt
+                die Wirksamkeit der übrigen Bestimmungen unberührt.</p>
+        </div>
+
+        <div class="last-updated">
+            Letzte Aktualisierung: 20. Dezember 2024<br>
+            PyroHosting - Premium Hosting Without Compromise
+        </div>
+    </div>
+</div>
+
+<script>
+    feather.replace();
+</script>
+{% endblock %}

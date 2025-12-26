@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daten - PyroHosting</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Reusing styles from dashboard/profile */
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 12, 0.95);
+            border-right: none;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(238, 129, 50, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--accent);
+        }
+
+        .badge-new {
+            background: #ff9800;
+            color: black;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Snow & Lights (Duplicated) */
+        .holiday-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .light-string {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .light-bulb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: flash 1s infinite alternate;
+            position: relative;
+            top: -5px;
+        }
+
+        @keyframes flash {
+            from {
+                opacity: 0.5;
+            }
+
+            to {
+                opacity: 1;
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 1000;
+            color: white;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(-5vw);
+            }
+
+            100% {
+                transform: translateY(110vh) translateX(5vw);
+            }
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: 0.5rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .breadcrumb a {
+            color: var(--muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        /* Tabs */
+        .profile-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            color: var(--secondary);
+            cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: block;
+        }
+
+        .tab-item:last-child {
+            border-right: none;
+        }
+
+        .tab-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .tab-item.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        /* Form Styles */
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .section-desc {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .alert-warning {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            color: #ffb74d;
+        }
+
+        .alert-info {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            color: #64b5f6;
+        }
+
+        .alert-success {
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            color: #00e676;
+        }
+
+        .alert a {
+            color: inherit;
+            text-decoration: underline;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            background: #09090b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-control:read-only {
+            cursor: not-allowed;
+            opacity: 0.7;
+            border-color: transparent;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            float: right;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .btn-save:hover {
+            background: #ff9f5a;
+        }
+
+        .btn-save:disabled {
+            background: var(--secondary);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        {% set active_page = 'profile' %}
+        {% set user_balance = user.balance %}
+        {% include 'sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Holiday Lights -->
+            <div class="light-string">
+                <div class="light-bulb" style="background:red; box-shadow:0 0 10px red; animation-delay:0s"></div>
+                <div class="light-bulb" style="background:blue; box-shadow:0 0 10px blue; animation-delay:1.4s"></div>
+                <div class="light-bulb" style="background:lime; box-shadow:0 0 10px lime; animation-delay:2.8s"></div>
+            </div>
+
+            <div class="breadcrumb">
+                <a href="/dashboard"><i data-feather="arrow-left" style="width:16px;"></i> Zurück zum Dashboard</a>
+            </div>
+
+            <!-- Tabs -->
+            <div class="profile-tabs">
+                <a href="/profile" class="tab-item">Profil</a>
+                <a href="/profile/data" class="tab-item active">Daten</a>
+            </div>
+
+            <form method="POST" action="{{ url_for('profile_data') }}">
+
+                <!-- Personal Info -->
+                <div class="section-header">
+                    <div class="section-title">Persönliche Angaben</div>
+                    <div class="section-desc">Verwalte deine persönlichen Informationen und Kontaktdaten.</div>
+                </div>
+
+                {% if saved_data %}
+                <!-- Locked State Alert -->
+                <div class="alert alert-warning">
+                    <i data-feather="lock" style="min-width:18px;"></i>
+                    <span>
+                        <strong>Wichtiger Hinweis:</strong> Vor-, Nachname und Adressdaten wurden bereits hinterlegt und
+                        sind gesperrt. Änderungen sind nur über ein <a href="#">Support-Ticket</a> möglich.
+                    </span>
+                </div>
+                {% else %}
+                <!-- Edit State Alert -->
+                <div class="alert alert-info">
+                    <i data-feather="info" style="min-width:18px;"></i>
+                    <span>
+                        <strong>Bitte ausfüllen:</strong> Bitte hinterlegen Sie Ihre echten Daten. Einmal gespeichert,
+                        können diese <strong>nicht mehr geändert</strong> werden!
+                    </span>
+                </div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Vorname</label>
+                        <input type="text" name="firstname" class="form-control"
+                            value="{{ saved_data.firstname if saved_data else '' }}" {% if saved_data %}readonly{% endif
+                            %}>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nachname</label>
+                        <input type="text" name="lastname" class="form-control"
+                            value="{{ saved_data.lastname if saved_data else '' }}" {% if saved_data %}readonly{% endif
+                            %}>
+                    </div>
+                </div>
+
+                <!-- Company Info -->
+                <div class="section-header">
+                    <div class="section-title">Unternehmensinformationen (Optional)</div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Unternehmensname</label>
+                        <input type="text" name="company" class="form-control"
+                            placeholder="Ihr Unternehmensname (optional)"
+                            value="{{ saved_data.company if saved_data else '' }}" {% if saved_data %}readonly{% endif
+                            %}>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">USt-IdNr. / VAT-Nummer</label>
+                        <input type="text" name="vat" class="form-control" placeholder="DE123456789 (optional)"
+                            value="{{ saved_data.vat if saved_data else '' }}" {% if saved_data %}readonly{% endif %}>
+                    </div>
+                </div>
+
+                <!-- Address Info -->
+                {% if saved_data %}
+                <div class="alert alert-success">
+                    <i data-feather="shield" style="min-width:18px;"></i>
+                    <span>
+                        <strong>Adresse gesperrt:</strong> Die Adressdaten wurden gespeichert und können nicht mehr
+                        geändert werden.
+                    </span>
+                </div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Straße</label>
+                        <input type="text" name="street" class="form-control"
+                            value="{{ saved_data.street if saved_data else '' }}" {% if saved_data %}readonly{% endif
+                            %}>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Haus Nr.</label>
+                        <input type="text" name="houseno" class="form-control"
+                            value="{{ saved_data.houseno if saved_data else '' }}" {% if saved_data %}readonly{% endif
+                            %}>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Postleitzahl</label>
+                        <input type="text" name="zip" class="form-control"
+                            value="{{ saved_data.zip if saved_data else '' }}" {% if saved_data %}readonly{% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stadt</label>
+                        <input type="text" name="city" class="form-control"
+                            value="{{ saved_data.city if saved_data else '' }}" {% if saved_data %}readonly{% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Land</label>
+                        <input type="text" name="country" class="form-control"
+                            value="{{ saved_data.country if saved_data else 'Deutschland' }}" {% if saved_data
+                            %}readonly{% endif %}>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label class="form-label">Telefonnummer mit Vorwahl</label>
+                    <input type="text" name="phone" class="form-control"
+                        value="{{ saved_data.phone if saved_data else '' }}" {% if saved_data %}readonly{% endif %}>
+                </div>
+
+                {% if not saved_data %}
+                <button type="submit" class="btn-save">
+                    <i data-feather="save" style="width:16px;"></i> Speichern
+                </button>
+                {% else %}
+                <button type="button" class="btn-save" disabled title="Daten sind gesperrt">
+                    <i data-feather="lock" style="width:16px;"></i> Gesperrt
+                </button>
+                {% endif %}
+
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+        // Snowfall (Reused)
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.innerHTML = '❄';
+            snowflake.classList.add('snowflake');
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            const duration = Math.random() * 5 + 5;
+            snowflake.style.animationDuration = duration + 's';
+            document.body.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), duration * 1000);
+        }
+        setInterval(createSnowflake, 200);
+    </script>
+</body>
+
+</html>

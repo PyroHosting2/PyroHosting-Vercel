@@ -1,0 +1,29 @@
+:root {
+    /* Colors - Pyro Host Clone */
+    --background: #110F0D;
+    --foreground: #FFEDD9;
+    --muted: rgba(255, 237, 217, 0.6);
+
+    /* Branding */
+    --accent: #EE8132;
+    --accent-glow: rgba(238, 129, 50, 0.4);
+    --accent-gradient: linear-gradient(135deg, #EE8132 0%, #D46312 100%);
+
+    /* UI Elements */
+    --card-bg: rgba(255, 239, 219, 0.03);
+    --card-border: rgba(255, 239, 219, 0.08);
+    --glass-blur: blur(12px);
+
+    /* Actions */
+    --button-primary: #EE8132;
+    --button-primary-text: #000000;
+
+    /* Status */
+    --success: #10B981;
+    --error: #EF4444;
+    --warning: #F59E0B;
+
+    /* Fonts & Shape */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --radius: 12px;
+}

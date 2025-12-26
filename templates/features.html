@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Features - PyroHosting{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 6rem; padding-bottom: 2rem;">
+    <div class="container text-center">
+        <h1>Why Choose <span class="text-accent">PyroHosting</span>?</h1>
+        <p style="color: var(--muted); max-width: 600px; margin: 0 auto;">We provide the best infrastructure for your
+            gaming needs.</p>
+    </div>
+</section>
+
+<section class="features" style="padding-top: 2rem;">
+    <div class="container">
+        <div class="features-grid">
+            <div class="glass-panel feature-card">
+                <div class="feature-icon"><i data-feather="shield"></i></div>
+                <h3>DDoS Protection</h3>
+                <p>Our custom DDoS mitigation filters attacks up to 1TBps ensuring your server stays online.</p>
+            </div>
+            <div class="glass-panel feature-card">
+                <div class="feature-icon"><i data-feather="cpu"></i></div>
+                <h3>AMD Ryzen 9</h3>
+                <p>We use the latest generation AMD Ryzen 9 processors for top-tier single-core performance.</p>
+            </div>
+            <div class="glass-panel feature-card">
+                <div class="feature-icon"><i data-feather="hard-drive"></i></div>
+                <h3>NVMe SSDs</h3>
+                <p>Lightning fast read/write speeds with enterprise-grade NVMe storage arrays.</p>
+            </div>
+            <div class="glass-panel feature-card">
+                <div class="feature-icon"><i data-feather="globe"></i></div>
+                <h3>Global Locations</h3>
+                <p>Servers available in Frankfurt, New York, London, and Singapore for low latency.</p>
+            </div>
+            <div class="glass-panel feature-card">
+                <div class="feature-icon"><i data-feather="clock"></i></div>
+                <h3>99.9% Uptime</h3>
+                <p>We guarantee high availability with our redundant network and power infrastructure.</p>
+            </div>
+            <div class="glass-panel feature-card">
+                <div class="feature-icon"><i data-feather="sliders"></i></div>
+                <h3>Custom Panel</h3>
+                <p>Easy to use control panel to manage your server, files, and plugins.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

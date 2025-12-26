@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PyroHosting{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Icons (Feather) -->
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="brand" style="display: flex; align-items: center; gap: 10px;">
+                <img src="/static/logo.png" alt="PyroHosting" style="height: 40px;">
+                PyroHosting
+            </a>
+
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/servers" class="nav-link">Servers</a>
+                <a href="/features" class="nav-link">Features</a>
+                <a href="/support" class="nav-link">Support</a>
+            </div>
+
+            <div class="nav-actions">
+                <a href="https://discord.gg/rhrM8QqrnF" target="_blank" class="btn btn-secondary">Discord</a>
+                <a href="/dashboard" class="btn btn-primary">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+                        <img src="/static/logo.png" alt="PyroHosting" style="height: 30px;">
+                        <h3 style="margin: 0;">PyroHosting</h3>
+                    </div>
+                    <p>Premium hosting solutions with high-performance hardware and advanced DDoS protection.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Products</h4>
+                    <ul class="footer-links">
+                        <li><a href="/servers">VPS</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://status.pyrohosting.io/" target="_blank">Status</a></li>
+                        <li><a href="https://discord.gg/cgKf7ZF3p8" target="_blank">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/tos">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center" style="text-align: center; color: var(--muted); font-size: 0.9rem;">
+                &copy; 2025 PyroHosting. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        feather.replace();
+
+        // Snowfall Effect
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.innerHTML = '❄';
+            snowflake.classList.add('snowflake');
+
+            // Randomize position and animation properties
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+
+            const duration = Math.random() * 5 + 5; // between 5 and 10s
+            snowflake.style.animationDuration = duration + 's';
+
+            document.body.appendChild(snowflake);
+
+            // Remove snowflake after animation ends
+            setTimeout(() => {
+                snowflake.remove();
+            }, duration * 1000);
+        }
+
+        // Create snowflakes continuously
+        setInterval(createSnowflake, 200);
+    </script>
+</body>
+
+</html>

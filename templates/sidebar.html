@@ -1,0 +1,82 @@
+<!-- Shared Sidebar Component -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <img src="/static/logo.png" alt="PyroHosting" style="width: 40px; margin-right: 10px;"> PyroHosting
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-title">Main</div>
+        <!-- Homepage: Always standard link, never SPA -->
+        <a href="/" class="nav-item {{ 'active' if active_page == 'home' }}">
+            <i data-feather="home"></i> Homepage
+        </a>
+
+        <a href="/dashboard" class="nav-item {{ 'active' if active_page == 'dashboard' and active_tab == 'home' }}" {%
+            if spa_mode %}onclick="event.preventDefault(); switchMainTab('dashboard-home', this, '/dashboard');" {%
+            endif %}>
+            <i data-feather="layout"></i> Dashboard
+        </a>
+
+        <a href="/dashboard/buy" class="nav-item {{ 'active' if active_tab == 'buy' }}" {% if spa_mode
+            %}onclick="event.preventDefault(); switchMainTab('buy-servers', this, '/dashboard/buy');" {% endif %}>
+            <i data-feather="shopping-cart"></i> Kaufen <span class="badge-new">NEW</span>
+        </a>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-title">Produkte</div>
+        <a href="/free-server" class="nav-item {{ 'active' if active_page == 'free_server' }}">
+            <i data-feather="server"></i> Free Server
+        </a>
+        <a href="/dashboard/configurator" class="nav-item {{ 'active' if active_tab == 'configurator' }}" {% if spa_mode
+            %}onclick="event.preventDefault(); switchMainTab('server-configurator', this, '/dashboard/configurator');"
+            {% endif %}>
+            <i data-feather="sliders"></i> Server Konfigurator
+        </a>
+        <a href="/domains" class="nav-item {{ 'active' if active_page == 'domains' }}">
+            <i data-feather="globe"></i> Domains
+        </a>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-title">Account</div>
+        <a href="/profile" class="nav-item {{ 'active' if active_page == 'profile' }}">
+            <i data-feather="user"></i> Dein Profil
+        </a>
+        <a href="/balance" class="nav-item {{ 'active' if active_page == 'balance' }}">
+            <i data-feather="credit-card"></i> Guthaben
+            <span
+                style="background: rgba(0, 230, 118, 0.2); color: #00e676; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 12px; margin-left: auto; border: 1px solid rgba(0, 230, 118, 0.3);">
+                {{ "%.2f"|format(user_balance if user_balance is defined else 0) }}€
+            </span>
+        </a>
+    </div>
+
+    {% if is_admin %}
+    <div class="nav-section">
+        <div class="nav-title">Administration</div>
+        <a href="/dashboard/admin/users" class="nav-item {{ 'active' if active_sub == 'users' }}" {% if spa_mode
+            %}onclick="event.preventDefault(); switchAdminSubTab('admin-users', this, '/dashboard/admin/users');" {%
+            endif %}>
+            <i data-feather="users"></i> Users
+        </a>
+        <a href="/dashboard/admin/servers" class="nav-item {{ 'active' if active_sub == 'servers' }}" {% if spa_mode
+            %}onclick="event.preventDefault(); switchAdminSubTab('admin-servers', this, '/dashboard/admin/servers');" {%
+            endif %}>
+            <i data-feather="server"></i> Server
+        </a>
+        <a href="/dashboard/admin/ips" class="nav-item {{ 'active' if active_sub == 'ips' }}" {% if spa_mode
+            %}onclick="event.preventDefault(); switchAdminSubTab('admin-ips', this, '/dashboard/admin/ips');" {% endif
+            %}>
+            <i data-feather="globe"></i> IP-Adressen
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="nav-section" style="margin-top: auto;">
+        <a href="https://discord.gg/rhrM8QqrnF" target="_blank" class="nav-item"
+            style="background: rgba(88, 101, 242, 0.1); color: #5865F2; border: 1px solid rgba(88, 101, 242, 0.2);">
+            <i data-feather="message-circle"></i> Discord Support
+        </a>
+    </div>
+</div>

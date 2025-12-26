@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guthaben - PyroHosting</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 12, 0.95);
+            border-right: none;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(238, 129, 50, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .badge-balance {
+            background: rgba(0, 230, 118, 0.2);
+            color: #00e676;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: auto;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        /* Balance Cards */
+        .balance-overview {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .balance-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .balance-label {
+            color: var(--muted);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .btn-deposit {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-deposit:hover {
+            background: #ff9f5a;
+            transform: translateY(-2px);
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .history-table th {
+            text-align: left;
+            color: var(--muted);
+            font-size: 0.8rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .history-table td {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        .amount-pos {
+            color: #00e676;
+        }
+
+        .amount-neg {
+            color: #ff3333;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: rgba(20, 20, 25, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transform: translateY(0);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .payment-method {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1.5rem;
+            text-decoration: none;
+        }
+
+        .payment-method:hover {
+            background: rgba(238, 129, 50, 0.1);
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .payment-logo {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+
+        .payment-info h4 {
+            margin: 0;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .payment-info p {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        /* Step Styles */
+        .modal-step {
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-step.active {
+            display: block;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .payment-input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-label {
+            display: block;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .payment-control {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .payment-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .warning-box {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid rgba(255, 152, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            color: #ffb74d;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .btn-payment-next {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-payment-next:hover {
+            background: #ff9f5a;
+            transform: translateY(-2px);
+        }
+
+        .payment-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .payment-back:hover {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        {% set active_page = 'balance' %}
+        {% set user_balance = user.balance %}
+        {% include 'sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="light-string">
+                <div class="light-bulb" style="background:red; box-shadow:0 0 10px red; animation-delay:0s"></div>
+                <div class="light-bulb" style="background:blue; box-shadow:0 0 10px blue; animation-delay:1.4s"></div>
+                <div class="light-bulb" style="background:lime; box-shadow:0 0 10px lime; animation-delay:2.8s"></div>
+            </div>
+
+            <h1 style="color:white; margin-bottom: 2rem;">Guthaben & Zahlungen</h1>
+
+            <div class="balance-overview">
+                <div class="balance-card">
+                    <div class="balance-label">Aktuelles Guthaben</div>
+                    <div class="balance-amount">{{ "%.2f"|format(user.balance) }} €</div>
+                    <button class="btn-deposit" onclick="openPaymentModal()">
+                        <i data-feather="plus-circle"></i> Guthaben aufladen
+                    </button>
+                    <p style="color: var(--muted); font-size: 0.8rem; text-align: center;">
+                        Sofort verfügbar via PayPal, Paysafecard & Krypto.
+                    </p>
+                </div>
+
+                <div class="history-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="color:white; margin:0;">Letzte Buchungen</h3>
+                        <a href="#" style="color:var(--accent); font-size:0.9rem; text-decoration:none;">Alle
+                            ansehen</a>
+                    </div>
+
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Beschreibung</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Betrag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if transactions %}
+                            {% for trans in transactions %}
+                            <tr>
+                                <td>{{ trans.date }}</td>
+                                <td>{{ trans.description }}</td>
+                                <td><span
+                                        class="{{ 'trans-success' if trans.status == 'Erfolgreich' or trans.status == 'Abgeschlossen' else 'trans-pending' }}">{{
+                                        trans.status }}</span></td>
+                                <td style="text-align:right;" class="amount-{{ trans.type }}">
+                                    {{ '+' if trans.type == 'pos' else '-' }}{{ "%.2f"|format(trans.amount) }} €
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align:center; color:var(--muted); padding: 2rem;">
+                                    Keine Buchungen gefunden.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closePaymentModal()">
+                <i data-feather="x"></i>
+            </div>
+
+            <!-- Step 0: Method Selection -->
+            <div id="step-0" class="modal-step active">
+                <h2 style="color:white; margin-top:0;">Guthaben aufladen</h2>
+                <p style="color:var(--muted); font-size:0.9rem;">Wähle eine Zahlungsmethode aus, um dein Guthaben sicher
+                    aufzuladen.</p>
+
+                <a href="#" class="payment-method" onclick="nextStep(1)">
+                    <div class="payment-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal"
+                            style="width:100%;">
+                    </div>
+                    <div class="payment-info">
+                        <h4>PayPal</h4>
+                        <p>Dauer: 4-8 Stunden</p>
+                    </div>
+                    <i data-feather="chevron-right" style="margin-left:auto; color:var(--muted);"></i>
+                </a>
+
+                <div
+                    style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.05); text-align:center;">
+                    <p style="color:var(--muted); font-size:0.75rem;">Sicher & Verschlüsselt durch SSL</p>
+                </div>
+            </div>
+
+            <!-- Step 1: PayPal Username -->
+            <div id="step-1" class="modal-step">
+                <div class="step-header">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" style="width:30px;">
+                    <h3 class="step-title">PayPal Benutzername</h3>
+                </div>
+                <div class="payment-input-group">
+                    <label class="payment-label">Dein PayPal Name</label>
+                    <input type="text" id="pp-username" class="payment-control" placeholder="z. B. Max Mustermann">
+                </div>
+                <button class="btn-payment-next" onclick="nextStep(2)">
+                    Weiter <i data-feather="arrow-right"></i>
+                </button>
+                <div class="payment-back" onclick="nextStep(0)">
+                    <i data-feather="arrow-left" style="width:14px;"></i> Zurück zur Auswahl
+                </div>
+            </div>
+
+            <!-- Step 2: Amount -->
+            <div id="step-2" class="modal-step">
+                <div class="step-header">
+                    <i data-feather="dollar-sign" style="color:var(--accent);"></i>
+                    <h3 class="step-title">Betrag wählen</h3>
+                </div>
+                <div class="payment-input-group">
+                    <label class="payment-label">Aufladebetrag (€)</label>
+                    <input type="number" id="pp-amount" class="payment-control" placeholder="z. B. 10.00" min="1"
+                        step="0.01">
+                </div>
+                <button class="btn-payment-next" onclick="finishPayment()">
+                    Jetzt bezahlen <i data-feather="external-link"></i>
+                </button>
+                <div class="payment-back" onclick="nextStep(1)">
+                    <i data-feather="arrow-left" style="width:14px;"></i> Zurück
+                </div>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div id="step-3" class="modal-step">
+                <div class="step-header">
+                    <i data-feather="help-circle" style="color:var(--accent);"></i>
+                    <h3 class="step-title">Zahlung abgeschlossen?</h3>
+                </div>
+                <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1.5rem;">Hast du die Zahlung via PayPal
+                    (Freunde & Familie) bereits gesendet?</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <button class="btn-payment-next" onclick="confirmPayment()" style="background:#00e676;">
+                        Ja, gesendet <i data-feather="check"></i>
+                    </button>
+                    <button class="btn-payment-next" onclick="nextStep(2)"
+                        style="background:rgba(255,255,255,0.05); color:white;">
+                        Noch nicht <i data-feather="x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Success -->
+            <div id="step-4" class="modal-step">
+                <div style="text-align:center; padding: 2rem 0;">
+                    <div
+                        style="width:60px; height:60px; background:rgba(0, 230, 118, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 1.5rem auto; color:#00e676;">
+                        <i data-feather="check" style="width:30px; height:30px;"></i>
+                    </div>
+                    <h3 style="color:white; margin:0 0 0.5rem 0;">Anfrage gesendet!</h3>
+                    <p style="color:var(--muted); font-size:0.9rem;">Vielen Dank! Dein Guthaben wird in Kürze (4-8 Std.)
+                        gutgeschrieben.</p>
+                    <button class="btn-payment-next" onclick="closePaymentModal()" style="margin-top:2rem;">
+                        Schließen
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        let currentStep = 0;
+
+        function openPaymentModal() {
+            nextStep(0);
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+
+        function nextStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
+            // Show new step
+            const nextEl = document.getElementById(`step-${step}`);
+            if (nextEl) {
+                nextEl.classList.add('active');
+                currentStep = step;
+                feather.replace();
+            }
+        }
+
+        function finishPayment() {
+            const amount = document.getElementById('pp-amount').value;
+            const user = document.getElementById('pp-username').value;
+
+            if (!amount || amount <= 0) {
+                notify("Ungültiger Betrag", "Bitte gib einen gültigen Betrag ein.", "error");
+                return;
+            }
+
+            if (!user) {
+                notify("PayPal Name fehlt", "Bitte gib deinen PayPal Namen ein.", "error");
+                nextStep(1);
+                return;
+            }
+
+            const url = `https://www.paypal.com/paypalme/networkteerorist/${amount}`;
+            window.open(url, '_blank');
+
+            // Move to confirmation step instead of closing
+            nextStep(3);
+        }
+
+        async function confirmPayment() {
+            const amount = document.getElementById('pp-amount').value;
+            const pp_name = document.getElementById('pp-username').value;
+
+            // Notify Backend
+            try {
+                const response = await fetch('/balance/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, pp_name })
+                });
+
+                if (response.ok) {
+                    nextStep(4);
+                } else {
+                    notify("Problem", "Es gab ein Problem bei der Benachrichtigung. Bitte kontaktiere den Support.", "error");
+                }
+            } catch (e) {
+                console.error(e);
+                nextStep(4); // Show success anyway in mock environment
+            }
+        }
+
+        /* --- Notify System JS --- */
+        function notify(title, message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            const icons = {
+                success: 'check-circle',
+                error: 'x-circle',
+                info: 'info',
+                warning: 'alert-triangle'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon"><i data-feather="${icons[type]}"></i></div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            feather.replace();
+
+            setTimeout(() => {
+                toast.classList.add('closing');
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        // Close on overlay click
+        window.onclick = function (event) {
+            const modal = document.getElementById('paymentModal');
+            if (event.target == modal) {
+                closePaymentModal();
+            }
+        }
+
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.innerHTML = '❄';
+            snowflake.classList.add('snowflake');
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            const duration = Math.random() * 5 + 5;
+            snowflake.style.animationDuration = duration + 's';
+            document.body.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), duration * 1000);
+        }
+        setInterval(createSnowflake, 200);
+
+        // Load icons
+        feather.replace();
+    </script>
+</body>
+
+</html>

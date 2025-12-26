@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="container hero-grid">
+        <div class="hero-content">
+            <h1>Premium Hosting <br><span class="text-gradient">Without Compromise</span></h1>
+            <p>Experience ultra-low latency, 99.9% uptime, and advanced DDoS protection. Start your journey with the
+                best performance on the market.</p>
+            <div class="hero-buttons">
+                <a href="/servers" class="btn btn-accent">View Offers</a>
+                <a href="/features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="/static/" alt="Futuristic Server Shield" />
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <div class="features-grid">
+            <!-- 1. DDoS -->
+            <div class="glass-panel feature-card">
+                <div class="feature-icon">
+                    <i data-feather="shield"></i>
+                </div>
+                <h3>PletX DDoS Protection</h3>
+                <p>Advanced PletX 4Tbps mitigation keeps your server online during massive attacks.</p>
+            </div>
+            <!-- 2. Ryzen -->
+            <div class="glass-panel feature-card">
+                <div class="feature-icon">
+                    <i data-feather="cpu"></i>
+                </div>
+                <h3>Ryzen 7 5800X</h3>
+                <p>High-performance gaming powered by AMD Ryzen 7 5800X processors.</p>
+            </div>
+            <!-- 3. Removed NVMe -->
+            <!-- 4. Network -->
+            <div class="glass-panel feature-card">
+                <div class="feature-icon">
+                    <i data-feather="globe"></i>
+                </div>
+                <h3>Global Connectivity</h3>
+                <p>Premium routing ensures the lowest possible latency and ping for players worldwide.</p>
+            </div>
+            <!-- 5. Instant Setup -->
+            <div class="glass-panel feature-card">
+                <div class="feature-icon">
+                    <i data-feather="zap"></i>
+                </div>
+                <h3>Instant Deployment</h3>
+                <p>Your server is online and ready to configure seconds after payment.</p>
+            </div>
+            <!-- 6. Uptime -->
+            <div class="glass-panel feature-card">
+                <div class="feature-icon">
+                    <i data-feather="server"></i>
+                </div>
+                <h3>99.99% Uptime</h3>
+                <p>Redundant power and cooling infrastructure guarantees 24/7 availability.</p>
+            </div>
+            <!-- 7. Panel -->
+            <div class="glass-panel feature-card">
+                <div class="feature-icon">
+                    <i data-feather="terminal"></i>
+                </div>
+                <h3>Custom Control Panel</h3>
+                <p>Easy-to-use Pterodactyl panel with modpack installers and backups.</p>
+            </div>
+            <!-- 8. Support -->
+            <div class="glass-panel feature-card">
+                <div class="feature-icon">
+                    <i data-feather="headphones"></i>
+                </div>
+                <h3>24/7 Support</h3>
+                <p>Our expert team is always available via Discord, Live Chat, and Tickets.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Free Trial Promo -->
+<section class="free-trial-banner">
+    <div class="container">
+        <div class="trial-card text-center">
+            <div class="trial-content">
+                <span class="badge-free">LIMITED TIME OFFER</span>
+                <h2 class="trial-title">Free Intel Xeon Trial VPS</h2>
+                <p class="trial-desc">
+                    Start your premium hosting journey today with zero risk. Get full 24-hours access to our
+                    high-performance Intel Xeon nodes.
+                </p>
+                <ul class="trial-features">
+                    <li><i data-feather="check-circle"></i> No Payment Required</li>
+                    <li><i data-feather="check-circle"></i> Instant Deployment</li>
+                    <li><i data-feather="terminal"></i> Full Root Access</li>
+                </ul>
+                <a href="/servers" class="btn-trial">Claim Free Server</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="steps">
+    <div class="container">
+        <div class="section-header">
+            <h2>So easy it's <span class="text-accent">Fire</span></h2>
+        </div>
+        <div class="steps-grid">
+            <div class="glass-panel step-card">
+                <span class="step-number">1</span>
+                <h3>Choose Product</h3>
+                <p>Select the perfect plan for your needs from our wide range of high-performance servers.</p>
+            </div>
+            <div class="glass-panel step-card">
+                <span class="step-number">2</span>
+                <h3>Instant Delivery</h3>
+                <p>Complete the payment and receive your access credentials immediately via email.</p>
+            </div>
+            <div class="glass-panel step-card">
+                <span class="step-number">3</span>
+                <h3>Start Playing</h3>
+                <p>Install your favorite games or applications with one click and start playing instantly.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

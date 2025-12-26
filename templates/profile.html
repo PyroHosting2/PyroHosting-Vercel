@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dein Profil - PyroHosting</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Dashboard & Profile Specifics */
+        body {
+            /* Fix layout shift */
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles (Duplicated from dashboard for consistency) */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 12, 0.95);
+            border-right: none;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-brand span {
+            color: var(--accent);
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(238, 129, 50, 0.1);
+            /* Purple tint */
+            color: white;
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Snow & Lights (Duplicated) */
+        .holiday-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .light-string {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .light-bulb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: flash 1s infinite alternate;
+            position: relative;
+            top: -5px;
+        }
+
+        @keyframes flash {
+            from {
+                opacity: 0.5;
+            }
+
+            to {
+                opacity: 1;
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 1000;
+            color: white;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(-5vw);
+            }
+
+            100% {
+                transform: translateY(110vh) translateX(5vw);
+            }
+        }
+
+        /* Profile Specifics */
+        .breadcrumb {
+            display: flex;
+            gap: 0.5rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .breadcrumb a {
+            color: var(--muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        /* Tabs */
+        .profile-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            color: var(--secondary);
+            cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .tab-item:last-child {
+            border-right: none;
+        }
+
+        .tab-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .tab-item.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        /* Profile Card */
+        .profile-section {
+            background: rgba(25, 25, 28, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .section-desc {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .user-header {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-details h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: white;
+        }
+
+        .user-details p {
+            margin: 0.2rem 0 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            cursor: not-allowed;
+        }
+
+        .badge-verified {
+            background: #5865F2;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .btn-discord {
+            background: #5865F2;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            float: right;
+        }
+
+        .btn-discord:hover {
+            background: #4752c4;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        {% set active_page = 'profile' %}
+        {% set user_balance = user.balance if user is defined else (user_session.balance if user_session is defined else
+        0) %}
+        {% include 'sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Holiday Lights -->
+            <div class="light-string">
+                <div class="light-bulb" style="background:red; box-shadow:0 0 10px red; animation-delay:0s"></div>
+                <!-- ... lights ... -->
+                <div class="light-bulb" style="background:blue; box-shadow:0 0 10px blue; animation-delay:1.4s"></div>
+                <div class="light-bulb" style="background:lime; box-shadow:0 0 10px lime; animation-delay:2.8s"></div>
+            </div>
+
+            <div class="breadcrumb">
+                <a href="/dashboard"><i data-feather="arrow-left" style="width:16px;"></i> Zurück zum Dashboard</a>
+            </div>
+
+            <!-- Tabs -->
+            <div class="profile-tabs">
+                <a href="/profile" class="tab-item active">Profil</a>
+                <a href="/profile/data" class="tab-item">Daten</a>
+            </div>
+
+            <!-- Profile Info -->
+            <div class="profile-section">
+                <div class="section-title">Profil Informationen</div>
+                <div class="section-desc">Deine Discord-Kontoinformationen werden automatisch synchronisiert.</div>
+
+                <div class="user-header">
+                    <!-- Avatar -->
+                    {% if user.avatar %}
+                    <img src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}{{ '.gif' if user.avatar.startswith('a_') else '.png' }}"
+                        alt="Avatar" class="user-avatar-large">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=random" alt="Avatar"
+                        class="user-avatar-large">
+                    {% endif %}
+
+                    <div class="user-details">
+                        <h2>{{ user.username }} <span class="badge-verified">DISCORD</span></h2>
+                        <p>{{ user.username }}</p>
+                        <p>{{ user.email }}</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Discord ID</label>
+                        <input type="text" class="form-control" value="{{ user.id }}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Benutzername</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">E-Mail</label>
+                        <input type="text" class="form-control" value="{{ user.email }}" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Management -->
+            <div class="profile-section">
+                <div class="section-title">Account Verwaltung</div>
+                <div class="section-desc">Verwalte deine Kontosicherheit und -einstellungen.</div>
+
+                <div style="margin-top: 1rem;">
+                    <strong>Discord Profil bearbeiten</strong><br>
+                    <span class="text-muted" style="font-size:0.9rem; color:var(--muted);">Ändere dein Profil direkt in
+                        Discord</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        // Snowfall Effect (Reused)
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.innerHTML = '❄';
+            snowflake.classList.add('snowflake');
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            const duration = Math.random() * 5 + 5;
+            snowflake.style.animationDuration = duration + 's';
+            document.body.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), duration * 1000);
+        }
+        setInterval(createSnowflake, 200);
+    </script>
+</body>
+
+</html>
